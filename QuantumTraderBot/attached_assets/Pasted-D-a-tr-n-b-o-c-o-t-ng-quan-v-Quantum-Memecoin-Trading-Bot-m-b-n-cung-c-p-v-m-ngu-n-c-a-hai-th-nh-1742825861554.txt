@@ -1,0 +1,197 @@
+Dựa trên báo cáo tổng quan về Quantum Memecoin Trading Bot mà bạn cung cấp và mã nguồn của hai thành phần chính (PumpPortalClient và TradingIntegration), tôi nhận thấy bot của bạn đã có những tiến bộ đáng kể trong việc kết nối với PumpPortal và phát hiện token mới. Tuy nhiên, vẫn còn một số vấn đề cần được giải quyết để cải thiện độ tin cậy và hiệu suất. Dưới đây là các điểm cần cải thiện cùng với các giải pháp code thực tế, dựa trên mã nguồn bạn đã gửi và không sử dụng code mô phỏng.
+
+1. Xử lý lỗi "No callbacks registered"
+Vấn đề: Báo cáo log cho thấy lỗi "No callbacks registered", điều này có nghĩa là TradingIntegration chưa đăng ký callback đúng cách với PumpPortalClient, dẫn đến việc các sự kiện token mới không được xử lý.
+
+Giải pháp: Đảm bảo rằng TradingIntegration đăng ký các callback với PumpPortalClient ngay khi khởi động. Trong mã nguồn hiện tại, bạn đã thực hiện việc đăng ký trong hàm start() của TradingIntegration, nhưng chúng ta cần kiểm tra và đảm bảo rằng các callback được đăng ký trước khi PumpPortalClient bắt đầu nhận sự kiện.
+
+Code thực tế (đã có trong mã nguồn, nhưng cần xác nhận thứ tự thực thi):
+
+python
+
+
+
+# Trong class TradingIntegration, hàm start
+async def start(self):
+    if self.is_running:
+        logger.warning("TradingIntegration already running")
+        return
+    
+    logger.info("Starting TradingIntegration")
+    self.state_manager.update_component_status('trading_integration', 'starting')
+    
+    # Đăng ký callback với PumpPortalClient trước khi khởi động các tác vụ khác
+    self.pump_portal_client.register_new_token_callback(self._handle_new_token)
+    self.pump_portal_client.register_liquidity_change_callback(self._handle_liquidity_change)
+    self.pump_portal_client.register_price_change_callback(self._handle_price_change)
+    
+    # Đăng ký callback cho OnchainAnalyzer (nếu cần)
+    self.onchain_analyzer.register_new_token_callback(self._handle_onchain_new_token)
+    self.onchain_analyzer.register_liquidity_change_callback(self._handle_liquidity_change)
+    self.onchain_analyzer.register_whale_activity_callback(self._handle_whale_activity)
+    
+    # Khởi động các tác vụ sau khi đăng ký callback
+    self.is_running = True
+    self.worker_task = asyncio.create_task(self._trade_worker())
+    self.connection_monitor_task = asyncio.create_task(self._connection_status_monitor())
+    
+    self.state_manager.update_component_status('trading_integration', 'running')
+    logger.info("TradingIntegration started")
+Kiểm tra thực tế:
+
+Thêm log để xác nhận số lượng callback đã đăng ký sau khi khởi động:
+python
+
+
+
+# Thêm vào cuối hàm start của TradingIntegration
+logger.info(f"Registered {len(self.pump_portal_client.new_token_callbacks)} new token callbacks with PumpPortalClient")
+Nếu log cho thấy số lượng callback là 0, kiểm tra xem pump_portal_client đã được khởi tạo đúng cách trước khi gọi start() trong TradingIntegration. Đảm bảo rằng PumpPortalClient được khởi động trước TradingIntegration trong luồng khởi động hệ thống.
+2. Xử lý lỗi kết nối WebSocket (no close frame received)
+Vấn đề: Bot gặp lỗi khi kết nối WebSocket bị ngắt mà không nhận được frame đóng ("no close frame received"), dẫn đến việc kết nối không được khôi phục tự động.
+
+Giải pháp: Cải thiện cơ chế kết nối lại trong PumpPortalClient bằng cách tăng cường logic retry trong hàm _connect_websocket. Mã nguồn hiện tại đã có cơ chế thử lại, nhưng chúng ta sẽ tối ưu hóa để xử lý lỗi này tốt hơn.
+
+Code thực tế (cập nhật trong PumpPortalClient):
+
+python
+
+
+
+# Trong class PumpPortalClient, hàm _connect_websocket
+async def _connect_websocket(self):
+    while self.is_running and (self.reconnect_attempts < self.max_reconnect_attempts or self.max_reconnect_attempts <= 0):
+        try:
+            logger.info(f"Connecting to PumpPortal WebSocket API at {self.websocket_url}")
+            self.websocket = await websockets.connect(self.websocket_url)
+            
+            # Gửi thông điệp xác thực sau khi kết nối
+            auth_message = {"method": "auth", "key": self.api_key}
+            await self.websocket.send(json.dumps(auth_message))
+            
+            self.is_connected = True
+            self.reconnect_attempts = 0
+            logger.info("Connected to PumpPortal WebSocket API")
+            self.state_manager.update_component_status('pump_portal_client', 'running')
+            
+            # Thoát vòng lặp nếu kết nối thành công
+            return True
+        
+        except (ConnectionError, OSError, websockets.exceptions.ConnectionClosedError) as e:
+            self.is_connected = False
+            self.reconnect_attempts += 1
+            logger.error(f"WebSocket connection error: {str(e)}")
+            self.state_manager.update_component_status(
+                'pump_portal_client', 
+                'error', 
+                f"WebSocket connection error: {str(e)}"
+            )
+            
+            # Tính thời gian chờ với backoff
+            reconnect_wait = min(self.reconnect_interval * (self.reconnect_backoff_factor ** self.reconnect_attempts), 300)
+            logger.info(f"Reconnecting in {reconnect_wait} seconds (attempt {self.reconnect_attempts})")
+            await asyncio.sleep(reconnect_wait)
+    
+    logger.error("Max reconnection attempts reached, giving up")
+    return False
+Thêm vào hàm start của PumpPortalClient:
+
+python
+
+
+
+# Trong hàm start của PumpPortalClient
+async def start(self):
+    await super().start()
+    logger.info("Starting PumpPortalClient")
+    self.uptime_start = time.time()
+    
+    if self.session is None:
+        self.session = aiohttp.ClientSession()
+    
+    # Kết nối WebSocket và xử lý lại nếu thất bại
+    connected = await self._connect_websocket()
+    if connected:
+        await self._subscribe_to_events()
+        self._message_handler_task = asyncio.create_task(self._message_handler())
+        self._tasks.append(self._message_handler_task)
+        self._keep_alive_task = asyncio.create_task(self._keep_connection_alive())
+        self._tasks.append(self._keep_alive_task)
+        logger.info("PumpPortalClient started")
+    else:
+        logger.error("Initial connection failed, starting background reconnect task")
+        self._reconnect_task = asyncio.create_task(self._reconnect_websocket_loop())
+        self._tasks.append(self._reconnect_task)
+Ghi chú:
+
+Cơ chế backoff được thêm vào với reconnect_backoff_factor (mặc định là 1.5) để tăng thời gian chờ giữa các lần thử lại, tránh quá tải server.
+Xử lý cụ thể lỗi websockets.exceptions.ConnectionClosedError để phát hiện trường hợp "no close frame received".
+3. Thực hiện kiểm tra sức khỏe định kỳ cho toàn bộ hệ thống
+Vấn đề: Hiện tại chưa có cơ chế kiểm tra sức khỏe định kỳ để phát hiện và thông báo các vấn đề trong hệ thống.
+
+Giải pháp: Thêm một tác vụ kiểm tra sức khỏe định kỳ trong TradingIntegration, tận dụng state_manager và telegram_notifier để giám sát trạng thái các thành phần và gửi cảnh báo khi cần.
+
+Code thực tế (thêm vào TradingIntegration):
+
+python
+
+
+
+# Trong class TradingIntegration
+async def _health_check(self):
+    while self.is_running:
+        try:
+            # Kiểm tra trạng thái PumpPortalClient
+            pumpportal_state = self.state_manager.get_component_state('pump_portal_client')
+            pumpportal_status = pumpportal_state.get('status') if pumpportal_state else 'unknown'
+            
+            if pumpportal_status != 'running':
+                logger.error(f"PumpPortalClient is not running (status: {pumpportal_status})")
+                if self.telegram_notifier:
+                    await self.telegram_notifier.send_message(
+                        f"⚠️ PumpPortalClient is not running (status: {pumpportal_status})",
+                        level="ERROR"
+                    )
+            
+            # Kiểm tra số lượng callback đã đăng ký
+            callback_count = len(self.pump_portal_client.new_token_callbacks)
+            if callback_count == 0:
+                logger.warning("No callbacks registered with PumpPortalClient")
+                if self.telegram_notifier:
+                    await self.telegram_notifier.send_message(
+                        "⚠️ No callbacks registered with PumpPortalClient",
+                        level="WARNING"
+                    )
+            
+            # Kiểm tra RaydiumClient (giả sử có phương thức get_status)
+            raydium_status = self.raydium_client.get_status() if hasattr(self.raydium_client, 'get_status') else 'unknown'
+            if raydium_status != 'running':
+                logger.error(f"RaydiumClient is not running (status: {raydium_status})")
+                if self.telegram_notifier:
+                    await self.telegram_notifier.send_message(
+                        f"⚠️ RaydiumClient is not running (status: {raydium_status})",
+                        level="ERROR"
+                    )
+            
+            # Cập nhật metrics
+            self.state_manager.update_component_metric(
+                'trading_integration',
+                'health_check_timestamp',
+                time.time()
+            )
+            
+        except Exception as e:
+            logger.error(f"Error in health check: {str(e)}")
+        
+        await asyncio.sleep(60)  # Kiểm tra mỗi 60 giây
+
+# Thêm vào hàm start của TradingIntegration
+async def start(self):
+    # ... (các phần trước)
+    self.health_check_task = asyncio.create_task(self._health_check())
+    self.state_manager.update_component_status('trading_integration', 'running')
+    logger.info("TradingIntegration started")
+Ghi chú:
+
+Nếu RaydiumClient không có phương thức get_status(), bạn cần thêm một phương thức tương tự để kiểm tra trạng thái của nó.
+Tác vụ này chạy mỗi 60 giây và gửi thông báo qua Telegram khi phát hiện vấn đề.

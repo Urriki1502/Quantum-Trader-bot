@@ -1,0 +1,42 @@
+=== QUANTUM MEMECOIN TRADING BOT - CLEANUP SCRIPT ===
+Thời gian bắt đầu: Mon 24 Mar 2025 03:47:30 AM UTC
+=================================================
+1. Dọn dẹp các file script shell thừa...
+  Lưu trữ file: cleanup_project.sh
+  Lưu trữ file: deployment_run.sh
+  Lưu trữ file: deploy.sh
+  Lưu trữ file: fix_deployment.sh
+  Lưu trữ file: run.sh
+  Lưu trữ file: start_system.sh
+  Lưu trữ file: start_webapp.sh
+  Lưu trữ file: stop_system.sh
+  Lưu trữ file: unified_launcher.sh
+  Lưu trữ file: unified_workflow.sh
+  Lưu trữ file: update_deployment.sh
+  Lưu trữ file: webapp.sh
+2. Dọn dẹp các file Python thừa...
+  Lưu trữ file: health_test.py
+  Lưu trữ file: main_deployment.py
+  Lưu trữ file: main_launcher.py
+  Lưu trữ file: run_webapp.py
+  Lưu trữ file: start_all.py
+  Lưu trữ file: unified_launcher.py
+  Lưu trữ file: unified_startup.py
+  Lưu trữ file: webapp_launcher.py
+  Lưu trữ file: webapp.py
+3. Dọn dẹp các file markdown thừa...
+  Lưu trữ file: deployment_checklist.md
+  Lưu trữ file: deployment_summary.md
+  Lưu trữ file: deploy_report.md
+  Lưu trữ file: performance_benchmarks.md
+  Lưu trữ file: unit_test_results.md
+4. Dọn dẹp file logs cũ...
+  Nén file log: logs/quantum_bot.log
+  Nén file log: logs/error.log
+5. Cập nhật file README để phản ánh thay đổi...
+6. Tạo file .gitignore phù hợp...
+=================================================
+Dọn dẹp hoàn tất vào: Mon 24 Mar 2025 03:47:31 AM UTC
+Các file không cần thiết đã được di chuyển vào thư mục .archive
+Để khôi phục file, sử dụng: mv .archive/tên_file .
+=================================================

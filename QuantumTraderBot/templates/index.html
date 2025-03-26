@@ -1,0 +1,125 @@
+{% extends "layout.html" %}
+
+{% block title %}Quantum Memecoin Trading Bot - Home{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-12 text-center">
+            <h1 class="display-4 mb-4">Quantum Memecoin Trading Bot</h1>
+            <p class="lead">Advanced cryptocurrency trading bot specialized for memecoin trading on Solana.</p>
+        </div>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-md-6">
+            <div class="card bg-dark">
+                <div class="card-body">
+                    <h2 class="card-title">Bot Status</h2>
+                    <p class="card-text" id="botStatus">Checking status...</p>
+                    <div class="d-flex justify-content-between">
+                        <button id="startButton" class="btn btn-success">Start Bot</button>
+                        <button id="stopButton" class="btn btn-danger">Stop Bot</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card bg-dark">
+                <div class="card-body">
+                    <h2 class="card-title">Quick Stats</h2>
+                    <ul class="list-group list-group-flush bg-dark">
+                        <li class="list-group-item bg-dark">Active Trades: <span id="activeTradesCount">0</span></li>
+                        <li class="list-group-item bg-dark">Tokens Monitored: <span id="tokensCount">0</span></li>
+                        <li class="list-group-item bg-dark">Performance: <span id="performanceStats">N/A</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card bg-dark">
+                <div class="card-body">
+                    <h2 class="card-title">Recent Activity</h2>
+                    <div class="table-responsive">
+                        <table class="table table-dark">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Activity</th>
+                                    <th>Details</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentActivity">
+                                <tr>
+                                    <td colspan="3" class="text-center">No recent activity</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block additional_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Bot control buttons
+    const startButton = document.getElementById('startButton');
+    const stopButton = document.getElementById('stopButton');
+    const botStatus = document.getElementById('botStatus');
+
+    // Start bot
+    startButton.addEventListener('click', function() {
+        fetch('/api/bot/start', {
+            method: 'POST',
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                botStatus.textContent = 'Running';
+                botStatus.className = 'card-text text-success';
+            } else {
+                botStatus.textContent = 'Error: ' + data.message;
+                botStatus.className = 'card-text text-danger';
+            }
+        })
+        .catch(error => {
+            botStatus.textContent = 'Error: ' + error.message;
+            botStatus.className = 'card-text text-danger';
+        });
+    });
+
+    // Stop bot
+    stopButton.addEventListener('click', function() {
+        fetch('/api/bot/stop', {
+            method: 'POST',
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                botStatus.textContent = 'Stopped';
+                botStatus.className = 'card-text text-warning';
+            } else {
+                botStatus.textContent = 'Error: ' + data.message;
+                botStatus.className = 'card-text text-danger';
+            }
+        })
+        .catch(error => {
+            botStatus.textContent = 'Error: ' + error.message;
+            botStatus.className = 'card-text text-danger';
+        });
+    });
+
+    // Check initial bot status
+    botStatus.textContent = 'Not Running';
+    botStatus.className = 'card-text text-warning';
+});
+</script>
+{% endblock %}

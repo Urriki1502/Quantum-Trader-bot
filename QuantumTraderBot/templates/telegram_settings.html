@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram Settings - Quantum Memecoin Trading Bot</title>
+    <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
+    <style>
+        .notification-level {
+            margin-right: 1rem;
+        }
+        .form-section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            background-color: var(--bs-dark);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="/">Quantum Memecoin Trading Bot</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/trades">Trades</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/tokens">Tokens</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/strategies">Strategies</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/settings">Settings</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col">
+                <h1>Telegram Settings</h1>
+                <p class="lead">Configure Telegram notifications for your trading bot</p>
+            </div>
+        </div>
+
+        {% if success_message %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ success_message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endif %}
+
+        {% if error_message %}
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ error_message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endif %}
+
+        <form method="POST" action="/settings/telegram">
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h4 class="card-title">Connection Settings</h4>
+                    
+                    <div class="form-check form-switch mb-3">
+                        <input class="form-check-input" type="checkbox" id="telegram_enabled" name="telegram_enabled" {% if settings.enabled %}checked{% endif %}>
+                        <label class="form-check-label" for="telegram_enabled">Enable Telegram Notifications</label>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="bot_token" class="form-label">Bot Token</label>
+                        <input type="password" class="form-control" id="bot_token" name="bot_token" value="{{ settings.bot_token }}" placeholder="Enter your Telegram bot token">
+                        <div class="form-text">Create a bot with @BotFather on Telegram and paste the token here.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="chat_id" class="form-label">Chat ID</label>
+                        <input type="text" class="form-control" id="chat_id" name="chat_id" value="{{ settings.chat_id }}" placeholder="Enter your Telegram chat ID">
+                        <div class="form-text">This is the ID of the chat where notifications will be sent. Use @userinfobot to find your ID.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h4 class="card-title">Notification Settings</h4>
+                    
+                    <div class="mb-3 form-section">
+                        <h5>Notification Types</h5>
+                        <div class="form-check form-switch mb-2">
+                            <input class="form-check-input" type="checkbox" id="trade_notifications" name="trade_notifications" {% if settings.trade_notifications %}checked{% endif %}>
+                            <label class="form-check-label" for="trade_notifications">Trade Notifications</label>
+                            <div class="form-text">Receive notifications about trades (buys, sells, etc.)</div>
+                        </div>
+                        
+                        <div class="form-check form-switch mb-2">
+                            <input class="form-check-input" type="checkbox" id="system_notifications" name="system_notifications" {% if settings.system_notifications %}checked{% endif %}>
+                            <label class="form-check-label" for="system_notifications">System Notifications</label>
+                            <div class="form-text">Receive notifications about system events (startup, shutdown, errors, etc.)</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3 form-section">
+                        <h5>Notification Levels</h5>
+                        <p class="text-muted">Select which notification levels to receive:</p>
+                        
+                        <div class="d-flex flex-wrap">
+                            <div class="form-check notification-level">
+                                <input class="form-check-input" type="checkbox" id="level_info" name="notification_levels" value="INFO" {% if 'INFO' in settings.notification_levels %}checked{% endif %}>
+                                <label class="form-check-label" for="level_info">
+                                    <span class="badge bg-info">INFO</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check notification-level">
+                                <input class="form-check-input" type="checkbox" id="level_warning" name="notification_levels" value="WARNING" {% if 'WARNING' in settings.notification_levels %}checked{% endif %}>
+                                <label class="form-check-label" for="level_warning">
+                                    <span class="badge bg-warning">WARNING</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check notification-level">
+                                <input class="form-check-input" type="checkbox" id="level_error" name="notification_levels" value="ERROR" {% if 'ERROR' in settings.notification_levels %}checked{% endif %}>
+                                <label class="form-check-label" for="level_error">
+                                    <span class="badge bg-danger">ERROR</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check notification-level">
+                                <input class="form-check-input" type="checkbox" id="level_critical" name="notification_levels" value="CRITICAL" {% if 'CRITICAL' in settings.notification_levels %}checked{% endif %}>
+                                <label class="form-check-label" for="level_critical">
+                                    <span class="badge bg-danger">CRITICAL</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check notification-level">
+                                <input class="form-check-input" type="checkbox" id="level_trade" name="notification_levels" value="TRADE" {% if 'TRADE' in settings.notification_levels %}checked{% endif %}>
+                                <label class="form-check-label" for="level_trade">
+                                    <span class="badge bg-primary">TRADE</span>
+                                </label>
+                            </div>
+                            
+                            <div class="form-check notification-level">
+                                <input class="form-check-input" type="checkbox" id="level_system" name="notification_levels" value="SYSTEM" {% if 'SYSTEM' in settings.notification_levels %}checked{% endif %}>
+                                <label class="form-check-label" for="level_system">
+                                    <span class="badge bg-secondary">SYSTEM</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="max_messages_per_minute" class="form-label">Rate Limit (messages per minute)</label>
+                        <input type="number" class="form-control" id="max_messages_per_minute" name="max_messages_per_minute" value="{{ settings.max_messages_per_minute }}" min="1" max="60">
+                        <div class="form-text">Maximum number of messages that can be sent per minute to prevent rate limiting by Telegram.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <button type="submit" class="btn btn-primary">Save Settings</button>
+                <a href="/settings" class="btn btn-secondary ms-2">Cancel</a>
+                <button type="button" id="test_notification" class="btn btn-info ms-2">Test Notification</button>
+            </div>
+        </form>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('test_notification').addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Get current form data
+            const formData = new FormData(document.querySelector('form'));
+            
+            // Send test notification request
+            fetch('/settings/telegram/test', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Test notification sent successfully! Check your Telegram.');
+                } else {
+                    alert('Error sending test notification: ' + data.error);
+                }
+            })
+            .catch(error => {
+                alert('Error: ' + error);
+            });
+        });
+    </script>
+</body>
+</html>

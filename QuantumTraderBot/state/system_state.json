@@ -1,0 +1,1282 @@
+{
+  "health": {
+    "healthy": false,
+    "unhealthy_components": [
+      "config_manager",
+      "security_manager",
+      "raydium_client",
+      "trading_integration",
+      "risk_manager",
+      "strategy_manager",
+      "monitoring_system",
+      "telegram_notifier",
+      "memory_manager",
+      "log_manager",
+      "adapter"
+    ],
+    "component_count": 13,
+    "alerts": {
+      "total": 1000,
+      "unacknowledged": 1000,
+      "critical": 0,
+      "error": 809,
+      "warning": 185,
+      "info": 6
+    },
+    "global_metrics": {
+      "system_uptime": {
+        "value": 5772.8885090351105,
+        "timestamp": 1742882816.336188
+      },
+      "cpu_usage": {
+        "value": 65.8,
+        "timestamp": 1742882816.3361993
+      },
+      "memory_usage": {
+        "value": 82.1,
+        "timestamp": 1742882816.3362017
+      },
+      "disk_usage": {
+        "value": 50.4,
+        "timestamp": 1742882816.3362033
+      },
+      "component_count": {
+        "value": 13,
+        "timestamp": 1742882816.3362317
+      },
+      "alerts_total": {
+        "value": 100,
+        "timestamp": 1742882816.3366334
+      },
+      "alerts_critical": {
+        "value": 0,
+        "timestamp": 1742882816.336636
+      },
+      "alerts_error": {
+        "value": 83,
+        "timestamp": 1742882816.3366375
+      },
+      "alerts_warning": {
+        "value": 17,
+        "timestamp": 1742882816.336639
+      },
+      "alerts_info": {
+        "value": 0,
+        "timestamp": 1742882816.33664
+      }
+    },
+    "timestamp": 1742882816.3371382
+  },
+  "components": {
+    "config_manager": {
+      "name": "config_manager",
+      "status": "initializing",
+      "is_healthy": false,
+      "last_health_check": 1742877043.4470356,
+      "error_message": null,
+      "metrics": {},
+      "uptime": 5772.890103340149,
+      "state_history": []
+    },
+    "security_manager": {
+      "name": "security_manager",
+      "status": "initializing",
+      "is_healthy": false,
+      "last_health_check": 1742877043.4470437,
+      "error_message": null,
+      "metrics": {},
+      "uptime": 5772.890098810196,
+      "state_history": []
+    },
+    "pump_portal_client": {
+      "name": "pump_portal_client",
+      "status": "running",
+      "is_healthy": true,
+      "last_health_check": 1742882811.431618,
+      "error_message": null,
+      "metrics": {
+        "consecutive_misses": {
+          "value": 0,
+          "timestamp": 1742882811.431605
+        },
+        "cpu_percent": {
+          "value": 0.0,
+          "timestamp": 1742882811.431609
+        },
+        "memory_mb": {
+          "value": 107.15625,
+          "timestamp": 1742882811.43161
+        },
+        "error_count": {
+          "value": 0,
+          "timestamp": 1742882811.4316108
+        },
+        "uptime": {
+          "value": -4.76837158203125e-07,
+          "timestamp": 1742882811.431612
+        },
+        "last_heartbeat": {
+          "value": 1742882811.4316182,
+          "timestamp": 1742882811.4316185
+        },
+        "new_tokens_detected": {
+          "value": 1,
+          "timestamp": 1742877045.138024
+        },
+        "reconnect_ratio_per_hour": {
+          "value": 0.0,
+          "timestamp": 1742877135.8643105
+        }
+      },
+      "uptime": 5772.890096902847,
+      "state_history": [
+        {
+          "timestamp": 1742882750.3985167,
+          "old_status": "running",
+          "new_status": "running",
+          "error_message": null
+        },
+        {
+          "timestamp": 1742882765.4997747,
+          "old_status": "running",
+          "new_status": "running",
+          "error_message": null
+        },
+        {
+          "timestamp": 1742882780.9176092,
+          "old_status": "running",
+          "new_status": "running",
+          "error_message": null
+        },
+        {
+          "timestamp": 1742882796.0189614,
+          "old_status": "running",
+          "new_status": "running",
+          "error_message": null
+        },
+        {
+          "timestamp": 1742882811.4316144,
+          "old_status": "running",
+          "new_status": "running",
+          "error_message": null
+        }
+      ]
+    },
+    "onchain_analyzer": {
+      "name": "onchain_analyzer",
+      "status": "running",
+      "is_healthy": true,
+      "last_health_check": 1742882811.532083,
+      "error_message": null,
+      "metrics": {
+        "consecutive_misses": {
+          "value": 0,
+          "timestamp": 1742882811.5320709
+        },
+        "cpu_percent": {
+          "value": 0.0,
+          "timestamp": 1742882811.5320745
+        },
+        "memory_mb": {
+          "value": 107.15625,
+          "timestamp": 1742882811.5320761
+        },
+        "error_count": {
+          "value": 0,
+          "timestamp": 1742882811.5320766
+        },
+        "uptime": {
+          "value": -2.384185791015625e-07,
+          "timestamp": 1742882811.5320776
+        },
+        "last_heartbeat": {
+          "value": 1742882811.5320833,
+          "timestamp": 1742882811.5320833
+        },
+        "known_tokens": {
+          "value": 0,
+          "timestamp": 1742882785.0240548
+        },
+        "known_pools": {
+          "value": 0,
+          "timestamp": 1742882785.0240567
+        },
+        "whale_wallets": {
+          "value": 0,
+          "timestamp": 1742882785.0240574
+        },
+        "monitored_wallets": {
+          "value": 0,
+          "timestamp": 1742882785.0240583
+        },
+        "transaction_cache_size": {
+          "value": 0,
+          "timestamp": 1742882785.024059
+        },
+        "scan_interval": {
+          "value": 60,
+          "timestamp": 1742882785.02406
+        },
+        "max_blocks_per_scan": {
+          "value": 10,
+          "timestamp": 1742882785.0240605
+        },
+        "pump_portal_confidence": {
+          "value": 80,
+          "timestamp": 1742882785.0240612
+        },
+        "onchain_confidence": {
+          "value": 100,
+          "timestamp": 1742882785.0240617
+        }
+      },
+      "uptime": 5772.890095472336,
+      "state_history": [
+        {
+          "timestamp": 1742882765.6002486,
+          "old_status": "running",
+          "new_status": "running",
+          "error_message": null
+        },
+        {
+          "timestamp": 1742882781.0182118,
+          "old_status": "running",
+          "new_status": "running",
+          "error_message": null
+        },
+        {
+          "timestamp": 1742882785.0233555,
+          "old_status": "running",
+          "new_status": "degraded",
+          "error_message": "Failed to get latest blockhash from Solana RPC"
+        },
+        {
+          "timestamp": 1742882796.1194525,
+          "old_status": "degraded",
+          "new_status": "running",
+          "error_message": null
+        },
+        {
+          "timestamp": 1742882811.5320804,
+          "old_status": "running",
+          "new_status": "running",
+          "error_message": null
+        }
+      ]
+    },
+    "raydium_client": {
+      "name": "raydium_client",
+      "status": "running",
+      "is_healthy": false,
+      "last_health_check": 1742877045.5542235,
+      "error_message": null,
+      "metrics": {
+        "wallet_balance_sol": {
+          "value": 0.0,
+          "timestamp": 1742877045.554214
+        }
+      },
+      "uptime": 5772.890094280243,
+      "state_history": [
+        {
+          "timestamp": 1742877045.342372,
+          "old_status": "initializing",
+          "new_status": "starting",
+          "error_message": null
+        },
+        {
+          "timestamp": 1742877045.5542214,
+          "old_status": "starting",
+          "new_status": "running",
+          "error_message": null
+        }
+      ]
+    },
+    "trading_integration": {
+      "name": "trading_integration",
+      "status": "initializing",
+      "is_healthy": false,
+      "last_health_check": 1742882467.928667,
+      "error_message": "Auto-recovery initiated",
+      "metrics": {},
+      "uptime": 5772.890092611313,
+      "state_history": [
+        {
+          "timestamp": 1742882465.9244974,
+          "old_status": "initializing",
+          "new_status": "stopping",
+          "error_message": null
+        },
+        {
+          "timestamp": 1742882465.9255445,
+          "old_status": "stopping",
+          "new_status": "stopped",
+          "error_message": null
+        },
+        {
+          "timestamp": 1742882467.9279902,
+          "old_status": "stopped",
+          "new_status": "starting",
+          "error_message": null
+        },
+        {
+          "timestamp": 1742882467.9285069,
+          "old_status": "starting",
+          "new_status": "running",
+          "error_message": null
+        },
+        {
+          "timestamp": 1742882467.9286652,
+          "old_status": "running",
+          "new_status": "initializing",
+          "error_message": "Auto-recovery initiated"
+        }
+      ]
+    },
+    "risk_manager": {
+      "name": "risk_manager",
+      "status": "initializing",
+      "is_healthy": false,
+      "last_health_check": 1742877043.447056,
+      "error_message": null,
+      "metrics": {},
+      "uptime": 5772.89009141922,
+      "state_history": []
+    },
+    "strategy_manager": {
+      "name": "strategy_manager",
+      "status": "initializing",
+      "is_healthy": false,
+      "last_health_check": 1742877043.4470615,
+      "error_message": null,
+      "metrics": {},
+      "uptime": 5772.890086650848,
+      "state_history": []
+    },
+    "monitoring_system": {
+      "name": "monitoring_system",
+      "status": "running",
+      "is_healthy": false,
+      "last_health_check": 1742877043.4477205,
+      "error_message": null,
+      "metrics": {
+        "unhealthy_components": {
+          "value": 10,
+          "timestamp": 1742882780.3165984
+        },
+        "cpu_usage": {
+          "value": 65.8,
+          "timestamp": 1742882811.3310318
+        },
+        "memory_usage": {
+          "value": 82.1,
+          "timestamp": 1742882811.3310394
+        },
+        "disk_usage": {
+          "value": 50.4,
+          "timestamp": 1742882811.3310416
+        }
+      },
+      "uptime": 5772.8900847435,
+      "state_history": [
+        {
+          "timestamp": 1742877043.4476688,
+          "old_status": "initializing",
+          "new_status": "starting",
+          "error_message": null
+        },
+        {
+          "timestamp": 1742877043.4477189,
+          "old_status": "starting",
+          "new_status": "running",
+          "error_message": null
+        }
+      ]
+    },
+    "telegram_notifier": {
+      "name": "telegram_notifier",
+      "status": "initializing",
+      "is_healthy": false,
+      "last_health_check": 1742877043.4470663,
+      "error_message": null,
+      "metrics": {},
+      "uptime": 5772.890084266663,
+      "state_history": []
+    },
+    "memory_manager": {
+      "name": "memory_manager",
+      "status": "initializing",
+      "is_healthy": false,
+      "last_health_check": 1742877043.447068,
+      "error_message": null,
+      "metrics": {},
+      "uptime": 5772.890083312988,
+      "state_history": []
+    },
+    "log_manager": {
+      "name": "log_manager",
+      "status": "initializing",
+      "is_healthy": false,
+      "last_health_check": 1742877043.4470732,
+      "error_message": null,
+      "metrics": {},
+      "uptime": 5772.890079021454,
+      "state_history": []
+    },
+    "adapter": {
+      "name": "adapter",
+      "status": "initializing",
+      "is_healthy": false,
+      "last_health_check": 1742877043.4470754,
+      "error_message": null,
+      "metrics": {},
+      "uptime": 5772.890077829361,
+      "state_history": []
+    }
+  },
+  "alerts": [
+    {
+      "id": "monitoring_system-1742877958.8555994",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component onchain_analyzer is unhealthy: Failed to get latest blockhash from Solana RPC",
+      "timestamp": 1742877958.8555994,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877958.8553677",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component security_manager is unhealthy: None",
+      "timestamp": 1742877958.8553677,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877958.8548787",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component config_manager is unhealthy: None",
+      "timestamp": 1742877958.8548787,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877948.6334422",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component monitoring_system is unhealthy due to missed health checks, status: running",
+      "timestamp": 1742877948.6334422,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877948.6333501",
+      "component": "monitoring_system",
+      "level": "WARNING",
+      "message": "Component monitoring_system health check is stale, no updates for >5 minutes",
+      "timestamp": 1742877948.6333501,
+      "acknowledged": false
+    },
+    {
+      "id": "trading_integration-1742877948.6330874",
+      "component": "trading_integration",
+      "level": "WARNING",
+      "message": "Component trading_integration health check is stale, no updates for >5 minutes",
+      "timestamp": 1742877948.6330874,
+      "acknowledged": false
+    },
+    {
+      "id": "raydium_client-1742877948.632739",
+      "component": "raydium_client",
+      "level": "ERROR",
+      "message": "Component raydium_client is unhealthy due to missed health checks, status: running",
+      "timestamp": 1742877948.632739,
+      "acknowledged": false
+    },
+    {
+      "id": "raydium_client-1742877948.6326177",
+      "component": "raydium_client",
+      "level": "WARNING",
+      "message": "Component raydium_client health check is stale, no updates for >5 minutes",
+      "timestamp": 1742877948.6326177,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877897.8170652",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component adapter is unhealthy: None",
+      "timestamp": 1742877897.8170652,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877897.816818",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component log_manager is unhealthy: None",
+      "timestamp": 1742877897.816818,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877897.8166108",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component memory_manager is unhealthy: None",
+      "timestamp": 1742877897.8166108,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877897.8164022",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component telegram_notifier is unhealthy: None",
+      "timestamp": 1742877897.8164022,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877897.816187",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component strategy_manager is unhealthy: None",
+      "timestamp": 1742877897.816187,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877897.8159375",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component risk_manager is unhealthy: None",
+      "timestamp": 1742877897.8159375,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877897.8155665",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component trading_integration is unhealthy: Auto-recovery initiated",
+      "timestamp": 1742877897.8155665,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877897.8153205",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component raydium_client is unhealthy: None",
+      "timestamp": 1742877897.8153205,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877897.8150694",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component onchain_analyzer is unhealthy: Failed to get latest blockhash from Solana RPC",
+      "timestamp": 1742877897.8150694,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877897.8148463",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component security_manager is unhealthy: None",
+      "timestamp": 1742877897.8148463,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877897.8145301",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component config_manager is unhealthy: None",
+      "timestamp": 1742877897.8145301,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877888.5791805",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component monitoring_system is unhealthy due to missed health checks, status: running",
+      "timestamp": 1742877888.5791805,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877888.579049",
+      "component": "monitoring_system",
+      "level": "WARNING",
+      "message": "Component monitoring_system health check is stale, no updates for >5 minutes",
+      "timestamp": 1742877888.579049,
+      "acknowledged": false
+    },
+    {
+      "id": "raydium_client-1742877888.5760653",
+      "component": "raydium_client",
+      "level": "ERROR",
+      "message": "Component raydium_client is unhealthy due to missed health checks, status: running",
+      "timestamp": 1742877888.5760653,
+      "acknowledged": false
+    },
+    {
+      "id": "raydium_client-1742877888.5759447",
+      "component": "raydium_client",
+      "level": "WARNING",
+      "message": "Component raydium_client health check is stale, no updates for >5 minutes",
+      "timestamp": 1742877888.5759447,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877836.7847946",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component adapter is unhealthy: None",
+      "timestamp": 1742877836.7847946,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877836.7846265",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component log_manager is unhealthy: None",
+      "timestamp": 1742877836.7846265,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877836.7844384",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component memory_manager is unhealthy: None",
+      "timestamp": 1742877836.7844384,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877836.7842531",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component telegram_notifier is unhealthy: None",
+      "timestamp": 1742877836.7842531,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877836.7840743",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component strategy_manager is unhealthy: None",
+      "timestamp": 1742877836.7840743,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877836.7838917",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component risk_manager is unhealthy: None",
+      "timestamp": 1742877836.7838917,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877836.7836585",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component trading_integration is unhealthy: Auto-recovery initiated",
+      "timestamp": 1742877836.7836585,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877836.7834342",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component raydium_client is unhealthy: None",
+      "timestamp": 1742877836.7834342,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877836.7831643",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component security_manager is unhealthy: None",
+      "timestamp": 1742877836.7831643,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877836.7827766",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component config_manager is unhealthy: None",
+      "timestamp": 1742877836.7827766,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877828.560305",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component monitoring_system is unhealthy due to missed health checks, status: running",
+      "timestamp": 1742877828.560305,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877828.5602002",
+      "component": "monitoring_system",
+      "level": "WARNING",
+      "message": "Component monitoring_system health check is stale, no updates for >5 minutes",
+      "timestamp": 1742877828.5602002,
+      "acknowledged": false
+    },
+    {
+      "id": "raydium_client-1742877828.5596957",
+      "component": "raydium_client",
+      "level": "ERROR",
+      "message": "Component raydium_client is unhealthy due to missed health checks, status: running",
+      "timestamp": 1742877828.5596957,
+      "acknowledged": false
+    },
+    {
+      "id": "raydium_client-1742877828.5595791",
+      "component": "raydium_client",
+      "level": "WARNING",
+      "message": "Component raydium_client health check is stale, no updates for >5 minutes",
+      "timestamp": 1742877828.5595791,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877775.7607439",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component adapter is unhealthy: None",
+      "timestamp": 1742877775.7607439,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877775.760529",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component log_manager is unhealthy: None",
+      "timestamp": 1742877775.760529,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877775.7603745",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component memory_manager is unhealthy: None",
+      "timestamp": 1742877775.7603745,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877775.760201",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component telegram_notifier is unhealthy: None",
+      "timestamp": 1742877775.760201,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877775.7599976",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component strategy_manager is unhealthy: None",
+      "timestamp": 1742877775.7599976,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877775.759715",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component risk_manager is unhealthy: None",
+      "timestamp": 1742877775.759715,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877775.7594304",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component trading_integration is unhealthy: Auto-recovery initiated",
+      "timestamp": 1742877775.7594304,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877775.759155",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component raydium_client is unhealthy: None",
+      "timestamp": 1742877775.759155,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877775.7588933",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component security_manager is unhealthy: None",
+      "timestamp": 1742877775.7588933,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877775.758575",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component config_manager is unhealthy: None",
+      "timestamp": 1742877775.758575,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877768.5447755",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component monitoring_system is unhealthy due to missed health checks, status: running",
+      "timestamp": 1742877768.5447755,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877768.544603",
+      "component": "monitoring_system",
+      "level": "WARNING",
+      "message": "Component monitoring_system health check is stale, no updates for >5 minutes",
+      "timestamp": 1742877768.544603,
+      "acknowledged": false
+    },
+    {
+      "id": "raydium_client-1742877768.5435274",
+      "component": "raydium_client",
+      "level": "ERROR",
+      "message": "Component raydium_client is unhealthy due to missed health checks, status: running",
+      "timestamp": 1742877768.5435274,
+      "acknowledged": false
+    },
+    {
+      "id": "raydium_client-1742877768.5432715",
+      "component": "raydium_client",
+      "level": "WARNING",
+      "message": "Component raydium_client health check is stale, no updates for >5 minutes",
+      "timestamp": 1742877768.5432715,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877714.7380779",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component adapter is unhealthy: None",
+      "timestamp": 1742877714.7380779,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877714.7378929",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component log_manager is unhealthy: None",
+      "timestamp": 1742877714.7378929,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877714.7376554",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component memory_manager is unhealthy: None",
+      "timestamp": 1742877714.7376554,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877714.7374787",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component telegram_notifier is unhealthy: None",
+      "timestamp": 1742877714.7374787,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877714.7373102",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component strategy_manager is unhealthy: None",
+      "timestamp": 1742877714.7373102,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877714.7371304",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component risk_manager is unhealthy: None",
+      "timestamp": 1742877714.7371304,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877714.7368743",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component trading_integration is unhealthy: Auto-recovery initiated",
+      "timestamp": 1742877714.7368743,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877714.7366514",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component raydium_client is unhealthy: None",
+      "timestamp": 1742877714.7366514,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877714.736442",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component security_manager is unhealthy: None",
+      "timestamp": 1742877714.736442,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877714.7360706",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component config_manager is unhealthy: None",
+      "timestamp": 1742877714.7360706,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877708.4874942",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component monitoring_system is unhealthy due to missed health checks, status: running",
+      "timestamp": 1742877708.4874942,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877708.487385",
+      "component": "monitoring_system",
+      "level": "WARNING",
+      "message": "Component monitoring_system health check is stale, no updates for >5 minutes",
+      "timestamp": 1742877708.487385,
+      "acknowledged": false
+    },
+    {
+      "id": "raydium_client-1742877708.4869606",
+      "component": "raydium_client",
+      "level": "ERROR",
+      "message": "Component raydium_client is unhealthy due to missed health checks, status: running",
+      "timestamp": 1742877708.4869606,
+      "acknowledged": false
+    },
+    {
+      "id": "raydium_client-1742877708.4868672",
+      "component": "raydium_client",
+      "level": "WARNING",
+      "message": "Component raydium_client health check is stale, no updates for >5 minutes",
+      "timestamp": 1742877708.4868672,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877653.7133975",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component adapter is unhealthy: None",
+      "timestamp": 1742877653.7133975,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877653.7132561",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component log_manager is unhealthy: None",
+      "timestamp": 1742877653.7132561,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877653.7131228",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component memory_manager is unhealthy: None",
+      "timestamp": 1742877653.7131228,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877653.7129834",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component telegram_notifier is unhealthy: None",
+      "timestamp": 1742877653.7129834,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877653.7128112",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component strategy_manager is unhealthy: None",
+      "timestamp": 1742877653.7128112,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877653.7126176",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component risk_manager is unhealthy: None",
+      "timestamp": 1742877653.7126176,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877653.7124255",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component trading_integration is unhealthy: Auto-recovery initiated",
+      "timestamp": 1742877653.7124255,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877653.712157",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component raydium_client is unhealthy: None",
+      "timestamp": 1742877653.712157,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877653.7118912",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component security_manager is unhealthy: None",
+      "timestamp": 1742877653.7118912,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877653.7115657",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component config_manager is unhealthy: None",
+      "timestamp": 1742877653.7115657,
+      "acknowledged": false
+    },
+    {
+      "id": "trading_integration-1742877648.4753406",
+      "component": "trading_integration",
+      "level": "INFO",
+      "message": "Auto-recovery initiated for component trading_integration with stop/start sequence",
+      "timestamp": 1742877648.4753406,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877646.45934",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component monitoring_system is unhealthy due to missed health checks, status: running",
+      "timestamp": 1742877646.45934,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877646.4592314",
+      "component": "monitoring_system",
+      "level": "WARNING",
+      "message": "Component monitoring_system health check is stale, no updates for >5 minutes",
+      "timestamp": 1742877646.4592314,
+      "acknowledged": false
+    },
+    {
+      "id": "trading_integration-1742877646.4587915",
+      "component": "trading_integration",
+      "level": "ERROR",
+      "message": "Component trading_integration is unhealthy due to missed health checks, status: running",
+      "timestamp": 1742877646.4587915,
+      "acknowledged": false
+    },
+    {
+      "id": "trading_integration-1742877646.458657",
+      "component": "trading_integration",
+      "level": "WARNING",
+      "message": "Component trading_integration health check is stale, no updates for >5 minutes",
+      "timestamp": 1742877646.458657,
+      "acknowledged": false
+    },
+    {
+      "id": "raydium_client-1742877646.4584188",
+      "component": "raydium_client",
+      "level": "ERROR",
+      "message": "Component raydium_client is unhealthy due to missed health checks, status: running",
+      "timestamp": 1742877646.4584188,
+      "acknowledged": false
+    },
+    {
+      "id": "raydium_client-1742877646.45826",
+      "component": "raydium_client",
+      "level": "WARNING",
+      "message": "Component raydium_client health check is stale, no updates for >5 minutes",
+      "timestamp": 1742877646.45826,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877586.4473467",
+      "component": "monitoring_system",
+      "level": "WARNING",
+      "message": "Component monitoring_system health check is stale, no updates for >5 minutes",
+      "timestamp": 1742877586.4473467,
+      "acknowledged": false
+    },
+    {
+      "id": "trading_integration-1742877586.4472148",
+      "component": "trading_integration",
+      "level": "WARNING",
+      "message": "Component trading_integration health check is stale, no updates for >5 minutes",
+      "timestamp": 1742877586.4472148,
+      "acknowledged": false
+    },
+    {
+      "id": "raydium_client-1742877586.4470305",
+      "component": "raydium_client",
+      "level": "WARNING",
+      "message": "Component raydium_client health check is stale, no updates for >5 minutes",
+      "timestamp": 1742877586.4470305,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877526.3939805",
+      "component": "monitoring_system",
+      "level": "WARNING",
+      "message": "Component monitoring_system health check is stale, no updates for >5 minutes",
+      "timestamp": 1742877526.3939805,
+      "acknowledged": false
+    },
+    {
+      "id": "trading_integration-1742877526.3938744",
+      "component": "trading_integration",
+      "level": "WARNING",
+      "message": "Component trading_integration health check is stale, no updates for >5 minutes",
+      "timestamp": 1742877526.3938744,
+      "acknowledged": false
+    },
+    {
+      "id": "raydium_client-1742877526.3935747",
+      "component": "raydium_client",
+      "level": "WARNING",
+      "message": "Component raydium_client health check is stale, no updates for >5 minutes",
+      "timestamp": 1742877526.3935747,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877466.3785357",
+      "component": "monitoring_system",
+      "level": "WARNING",
+      "message": "Component monitoring_system health check is stale, no updates for >5 minutes",
+      "timestamp": 1742877466.3785357,
+      "acknowledged": false
+    },
+    {
+      "id": "trading_integration-1742877466.3783867",
+      "component": "trading_integration",
+      "level": "WARNING",
+      "message": "Component trading_integration health check is stale, no updates for >5 minutes",
+      "timestamp": 1742877466.3783867,
+      "acknowledged": false
+    },
+    {
+      "id": "raydium_client-1742877466.3780625",
+      "component": "raydium_client",
+      "level": "WARNING",
+      "message": "Component raydium_client health check is stale, no updates for >5 minutes",
+      "timestamp": 1742877466.3780625,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877406.3643925",
+      "component": "monitoring_system",
+      "level": "WARNING",
+      "message": "Component monitoring_system health check is stale, no updates for >5 minutes",
+      "timestamp": 1742877406.3643925,
+      "acknowledged": false
+    },
+    {
+      "id": "trading_integration-1742877406.3640716",
+      "component": "trading_integration",
+      "level": "WARNING",
+      "message": "Component trading_integration health check is stale, no updates for >5 minutes",
+      "timestamp": 1742877406.3640716,
+      "acknowledged": false
+    },
+    {
+      "id": "raydium_client-1742877406.3637908",
+      "component": "raydium_client",
+      "level": "WARNING",
+      "message": "Component raydium_client health check is stale, no updates for >5 minutes",
+      "timestamp": 1742877406.3637908,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877348.5870328",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component onchain_analyzer is unhealthy: Failed to get latest blockhash from Solana RPC",
+      "timestamp": 1742877348.5870328,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877346.3056788",
+      "component": "monitoring_system",
+      "level": "WARNING",
+      "message": "Component monitoring_system health check is stale, no updates for >5 minutes",
+      "timestamp": 1742877346.3056788,
+      "acknowledged": false
+    },
+    {
+      "id": "trading_integration-1742877346.3054657",
+      "component": "trading_integration",
+      "level": "WARNING",
+      "message": "Component trading_integration health check is stale, no updates for >5 minutes",
+      "timestamp": 1742877346.3054657,
+      "acknowledged": false
+    },
+    {
+      "id": "raydium_client-1742877346.3052297",
+      "component": "raydium_client",
+      "level": "WARNING",
+      "message": "Component raydium_client health check is stale, no updates for >5 minutes",
+      "timestamp": 1742877346.3052297,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877287.5602255",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component onchain_analyzer is unhealthy: Failed to get latest blockhash from Solana RPC",
+      "timestamp": 1742877287.5602255,
+      "acknowledged": false
+    },
+    {
+      "id": "monitoring_system-1742877226.5385199",
+      "component": "monitoring_system",
+      "level": "ERROR",
+      "message": "Component onchain_analyzer is unhealthy: Failed to get latest blockhash from Solana RPC",
+      "timestamp": 1742877226.5385199,
+      "acknowledged": false
+    }
+  ],
+  "global_metrics": {
+    "system_uptime": {
+      "value": 5772.8885090351105,
+      "timestamp": 1742882816.336188
+    },
+    "cpu_usage": {
+      "value": 65.8,
+      "timestamp": 1742882816.3361993
+    },
+    "memory_usage": {
+      "value": 82.1,
+      "timestamp": 1742882816.3362017
+    },
+    "disk_usage": {
+      "value": 50.4,
+      "timestamp": 1742882816.3362033
+    },
+    "component_count": {
+      "value": 13,
+      "timestamp": 1742882816.3362317
+    },
+    "alerts_total": {
+      "value": 100,
+      "timestamp": 1742882816.3366334
+    },
+    "alerts_critical": {
+      "value": 0,
+      "timestamp": 1742882816.336636
+    },
+    "alerts_error": {
+      "value": 83,
+      "timestamp": 1742882816.3366375
+    },
+    "alerts_warning": {
+      "value": 17,
+      "timestamp": 1742882816.336639
+    },
+    "alerts_info": {
+      "value": 0,
+      "timestamp": 1742882816.33664
+    }
+  },
+  "timestamp": 1742882816.3372173
+}
