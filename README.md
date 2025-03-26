@@ -1,5 +1,3 @@
-# Quantum-Trader-bot
-# Quantum-Trader-bot
 # Quantum Memecoin Trading Bot
 
 ![Status](https://img.shields.io/badge/status-production_ready-brightgreen)
