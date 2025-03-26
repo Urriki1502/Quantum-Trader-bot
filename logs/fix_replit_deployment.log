@@ -1,0 +1,99 @@
+=== FIX REPLIT DEPLOYMENT SCRIPT - Mon 24 Mar 2025 03:13:57 AM UTC ===
+Cập nhật cấu hình Replit để chạy cả web interface và trading bot
+Đã tạo backup cho file .replit
+Cấu hình .replit hiện tại:
+modules = ["python-3.11"]
+
+[nix]
+channel = "stable-24_05"
+
+[deployment]
+deploymentTarget = "gce"
+run = ["gunicorn", "--bind", "0.0.0.0:5000", "main:app"]
+ignorePorts = true
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Start application"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "trading_bot"
+
+[[workflows.workflow]]
+name = "Start application"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "gunicorn --bind 0.0.0.0:5000 --reuse-port --reload main:app"
+waitForPort = 5000
+
+[[workflows.workflow]]
+name = "trading_bot"
+author = "agent"
+
+[workflows.workflow.metadata]
+agentRequireRestartOnSave = false
+
+[[workflows.workflow.tasks]]
+task = "packager.installForAll"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python main.py"
+
+[[ports]]
+localPort = 5000
+externalPort = 80
+Đã tạo file .replit mới sử dụng unified_main.py
+Cấu hình .replit mới:
+run = ["gunicorn", "--bind", "0.0.0.0:5000", "unified_main:app"]
+hidden = ["venv", ".config", "**/__pycache__", "**/.mypy_cache", "**/*.pyc"]
+
+[nix]
+channel = "stable-22_11"
+
+[env]
+PYTHONPATH = "/nix/store/lc7qv2ldzrs1aq3hbyzmbgvn0h2w26pl-sitecustomize/lib/python/site-packages:/nix/store/dfg63lldbvcj207iyr9z0xw21d8ax02n-python3.11-pip-24.0/lib/python3.11/site-packages:/home/runner/workspace"
+
+[packager]
+language = "python3"
+ignoredPackages = ["unit_tests"]
+
+[packager.features]
+packageSearch = true
+guessImports = true
+enabledForHosting = false
+
+[languages.python3]
+pattern = "**/*.py"
+syntax = "python"
+
+[languages.python3.languageServer]
+start = ["pylsp"]
+
+[unitTest]
+language = "python3"
+
+[deployment]
+run = ["gunicorn", "--bind", "0.0.0.0:5000", "unified_main:app"]
+deploymentTarget = "cloudrun"
+Đã tạo và phân quyền thực thi cho run_unified.sh
+Đã tạo file hướng dẫn integrated_deployment_guide.md
+=== HOÀN TẤT CẬP NHẬT Mon 24 Mar 2025 03:13:57 AM UTC ===
+Vui lòng triển khai lại ứng dụng để áp dụng thay đổi.
