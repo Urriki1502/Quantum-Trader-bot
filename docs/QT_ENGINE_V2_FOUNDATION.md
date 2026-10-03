@@ -53,6 +53,10 @@ boundary; startup recovery completes it without resubmitting.
 - durable paper cash / buying-power accounting
 - mark-to-market equity snapshots and max drawdown
 - UTC daily realized-PnL circuit-breaker input
+- durable market-event journal with replay de-duplication
+- deterministic event-derived paper intent IDs
+- strategy interface plus a reference moving-average cross strategy
+- continuous free/public Raydium paper runner
 - fee-aware weighted average cost basis
 - sell-position validation
 - idempotent intent handling
@@ -65,8 +69,8 @@ boundary; startup recovery completes it without resubmitting.
 
 ## Next implementation steps
 
-1. Run paper market sessions driven by real read-only Raydium quotes.
-2. Add a signal/event layer and replayable strategy inputs.
+1. Run longer paper sessions on free/public Raydium data and collect evidence.
+2. Add persistent replay reports, equity curves and strategy attribution.
 3. Add transaction simulation and blockhash-expiry evidence to the future live adapter contract.
 4. Add persistent equity/drawdown metrics and replay reports.
 5. Run continuous paper trading with free/public infrastructure.

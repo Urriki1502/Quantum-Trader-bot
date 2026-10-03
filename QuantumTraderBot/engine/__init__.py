@@ -27,6 +27,15 @@ from .adapters import ExecutionAdapter, PaperExecutionAdapter, QuoteProvider, St
 from .service import TradingEngine, EngineResult
 from .assets import AssetRegistry, AssetSpec, USDC_MINT
 from .raydium_quote_provider import RaydiumUsdcQuoteProvider
+from .journal import SQLiteMarketJournal
+from .market import MarketTick, RaydiumPollingMarketSource
+from .session import PaperTradingSession, SessionDecision
+from .signals import (
+    MovingAverageCrossStrategy,
+    SignalAction,
+    StrategyContext,
+    StrategySignal,
+)
 
 __all__ = [
     "AssetRegistry",
@@ -49,8 +58,17 @@ __all__ = [
     "RiskPolicy",
     "RiskSnapshot",
     "RaydiumUsdcQuoteProvider",
+    "RaydiumPollingMarketSource",
+    "SQLiteMarketJournal",
     "SQLiteTradeLedger",
     "StaticQuoteProvider",
+    "MarketTick",
+    "MovingAverageCrossStrategy",
+    "PaperTradingSession",
+    "SessionDecision",
+    "SignalAction",
+    "StrategyContext",
+    "StrategySignal",
     "TradeIntent",
     "TradeSide",
     "TradeState",
