@@ -30,6 +30,13 @@ from .raydium_quote_provider import RaydiumUsdcQuoteProvider
 from .journal import SQLiteMarketJournal
 from .market import MarketTick, RaydiumPollingMarketSource
 from .session import PaperTradingSession, SessionDecision
+from .preflight import (
+    PreflightResult,
+    PreflightSimulationError,
+    RaydiumPreflightSimulator,
+    TransactionSimulation,
+)
+from .report import PerformanceReport, build_performance_report
 from .signals import (
     MovingAverageCrossStrategy,
     SignalAction,
@@ -59,16 +66,22 @@ __all__ = [
     "RiskSnapshot",
     "RaydiumUsdcQuoteProvider",
     "RaydiumPollingMarketSource",
+    "RaydiumPreflightSimulator",
     "SQLiteMarketJournal",
     "SQLiteTradeLedger",
     "StaticQuoteProvider",
     "MarketTick",
     "MovingAverageCrossStrategy",
     "PaperTradingSession",
+    "PerformanceReport",
+    "PreflightResult",
+    "PreflightSimulationError",
     "SessionDecision",
     "SignalAction",
     "StrategyContext",
     "StrategySignal",
+    "TransactionSimulation",
+    "build_performance_report",
     "TradeIntent",
     "TradeSide",
     "TradeState",

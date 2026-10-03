@@ -57,6 +57,8 @@ boundary; startup recovery completes it without resubmitting.
 - deterministic event-derived paper intent IDs
 - strategy interface plus a reference moving-average cross strategy
 - continuous free/public Raydium paper runner
+- mark-to-market JSON performance reports
+- unsigned Raydium build + Solana preflight simulation gate
 - fee-aware weighted average cost basis
 - sell-position validation
 - idempotent intent handling
@@ -70,10 +72,9 @@ boundary; startup recovery completes it without resubmitting.
 ## Next implementation steps
 
 1. Run longer paper sessions on free/public Raydium data and collect evidence.
-2. Add persistent replay reports, equity curves and strategy attribution.
-3. Add transaction simulation and blockhash-expiry evidence to the future live adapter contract.
-4. Add persistent equity/drawdown metrics and replay reports.
-5. Run continuous paper trading with free/public infrastructure.
-6. Only after the above remains green, add a guarded live execution adapter with
+2. Add replay reports, equity curves and strategy attribution.
+3. Add blockhash-expiry and signed-transaction identity evidence to the future live adapter contract.
+4. Add external-outcome reconciliation for SUBMITTED/UNKNOWN states.
+5. Only after the above remains green, add a guarded live execution adapter with
    explicit mainnet enablement, tiny hard caps and no implicit retry after ambiguous
    submission.

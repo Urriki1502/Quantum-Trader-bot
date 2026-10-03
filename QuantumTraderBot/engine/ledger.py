@@ -422,6 +422,21 @@ class SQLiteTradeLedger:
             if cur.rowcount != 1:
                 raise TradeNotFoundError(intent_id)
 
+    def list_positions(self) -> list[PositionSnapshot]:
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT * FROM positions ORDER BY asset"
+            ).fetchall()
+        return [
+            PositionSnapshot(
+                asset=row["asset"],
+                quantity=Decimal(row["quantity"]),
+                average_cost_usd=Decimal(row["average_cost_usd"]),
+                realized_pnl_usd=Decimal(row["realized_pnl_usd"]),
+            )
+            for row in rows
+        ]
+
     def get_position(self, asset: str) -> PositionSnapshot:
         with self._lock:
             row = self._conn.execute(
