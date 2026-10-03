@@ -38,6 +38,13 @@ from .preflight import (
     TransactionSimulation,
 )
 from .report import PerformanceReport, build_performance_report
+from .replay import (
+    JsonlMarketReplay,
+    ReplayFormatError,
+    ReplayQuoteProvider,
+    ReplaySummary,
+    run_replay,
+)
 from .fill import (
     FillReconciliationError,
     ObservedSwapFill,
@@ -92,11 +99,15 @@ __all__ = [
     "RiskPolicy",
     "RiskSnapshot",
     "RaydiumUsdcQuoteProvider",
+    "ReplayFormatError",
+    "ReplayQuoteProvider",
+    "ReplaySummary",
     "RaydiumPollingMarketSource",
     "RaydiumPreflightSimulator",
     "SQLiteMarketJournal",
     "SQLiteTradeLedger",
     "StaticQuoteProvider",
+    "JsonlMarketReplay",
     "MarketTick",
     "MovingAverageCrossStrategy",
     "PaperTradingSession",
@@ -114,6 +125,7 @@ __all__ = [
     "TransactionIdentityError",
     "TransactionSimulation",
     "build_performance_report",
+    "run_replay",
     "observed_fill_to_receipt",
     "transaction_identity_from_base64",
     "TradeIntent",

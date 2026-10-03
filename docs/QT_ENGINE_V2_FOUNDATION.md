@@ -66,6 +66,9 @@ boundary; startup recovery completes it without resubmitting.
 - exact serialized-transaction SHA-256 identity for retry-safe submission tracking
 - confirmed getTransaction token-balance delta reconciliation
 - actual SPL asset/USDC fill amount and effective price derived from chain metadata
+- deterministic JSONL replay source and replay-backed quote provider
+- replay equity curve + final performance summary
+- consolidated `qt_v2.py` CLI for replay, free paper mode and reports
 - network fee retained separately in lamports rather than guessed into USD
 - fee-aware weighted average cost basis
 - sell-position validation
@@ -86,3 +89,35 @@ boundary; startup recovery completes it without resubmitting.
 5. Only after the above remains green, add a tiny-cap live execution opt-in with
    explicit mainnet enablement, tiny hard caps and no implicit retry after ambiguous
    submission.
+
+
+## Free-first CLI
+
+The v2 entry point intentionally exposes no real-money submit command.
+
+```bash
+cd QuantumTraderBot
+
+# deterministic historical replay
+python qt_v2.py replay \
+  --input market.jsonl \
+  --db qt-paper.db \
+  --initial-cash 1000 \
+  --notional 25
+
+# continuous public-Rayidium-backed paper mode
+python qt_v2.py paper \
+  --symbol TOKEN \
+  --mint <TOKEN_MINT> \
+  --decimals <TOKEN_DECIMALS> \
+  --db qt-paper.db
+
+# inspect a persisted paper ledger
+python qt_v2.py report \
+  --db qt-paper.db \
+  --mark TOKEN=1.23
+```
+
+Replay JSONL uses one object per line with `asset`, `price_usd`,
+`liquidity_usd`, `observed_at` (timezone required), and optional
+`event_id`, `price_impact_bps`, and `source`.
