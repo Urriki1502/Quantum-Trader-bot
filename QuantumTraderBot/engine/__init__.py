@@ -1,8 +1,8 @@
 """QT Engine v2 foundation.
 
 The engine package is intentionally provider-agnostic. It contains no live
-credentials, no vendor-specific network calls, and no implicit real-money
-execution. Live adapters must implement the interfaces in adapters.py.
+credentials, no vendor-specific signing, and no implicit real-money execution.
+Live adapters must implement the interfaces in adapters.py.
 """
 
 from .models import (
@@ -13,15 +13,25 @@ from .models import (
     TradeState,
 )
 from .risk import RiskDecision, RiskEngine, RiskPolicy, RiskSnapshot
-from .ledger import SQLiteTradeLedger
+from .ledger import (
+    InsufficientPositionError,
+    PortfolioFillResult,
+    PortfolioMetrics,
+    PositionSnapshot,
+    SQLiteTradeLedger,
+)
 from .adapters import ExecutionAdapter, PaperExecutionAdapter, QuoteProvider, StaticQuoteProvider
 from .service import TradingEngine, EngineResult
 
 __all__ = [
+    "EngineResult",
     "ExecutionAdapter",
     "ExecutionReceipt",
-    "EngineResult",
+    "InsufficientPositionError",
     "PaperExecutionAdapter",
+    "PortfolioFillResult",
+    "PortfolioMetrics",
+    "PositionSnapshot",
     "Quote",
     "QuoteProvider",
     "RiskDecision",

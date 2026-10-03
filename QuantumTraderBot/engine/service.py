@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from decimal import Decimal
 from typing import Any
 
 from .adapters import (
@@ -9,8 +10,13 @@ from .adapters import (
     QuoteProvider,
     UnknownExecutionOutcome,
 )
-from .ledger import DuplicateIntentError, SQLiteTradeLedger
-from .models import TradeIntent, TradeState
+from .ledger import (
+    DuplicateIntentError,
+    InsufficientPositionError,
+    ReconciliationError,
+    SQLiteTradeLedger,
+)
+from .models import TradeIntent, TradeSide, TradeState
 from .risk import RiskEngine, RiskSnapshot
 
 
@@ -30,6 +36,7 @@ class TradingEngine:
       * intent_id is durable and unique.
       * duplicate calls never re-execute an existing intent.
       * ambiguous submission becomes UNKNOWN, never an automatic retry.
+      * confirmed executions are reconciled into the portfolio atomically.
     """
 
     def __init__(
@@ -65,10 +72,7 @@ class TradingEngine:
 
         pre = self.risk_engine.evaluate_intent(intent, snapshot)
         if not pre.allowed:
-            reason = ",".join(pre.reasons)
-            self.ledger.set_error(intent.intent_id, reason)
-            self.ledger.transition(intent.intent_id, TradeState.REJECTED, reason=reason)
-            return self._result(intent.intent_id, reasons=pre.reasons)
+            return self._reject(intent.intent_id, pre.reasons)
 
         self.ledger.transition(
             intent.intent_id,
@@ -88,10 +92,19 @@ class TradingEngine:
 
         quote_risk = self.risk_engine.evaluate_quote(intent, quote)
         if not quote_risk.allowed:
-            reason = ",".join(quote_risk.reasons)
-            self.ledger.set_error(intent.intent_id, reason)
-            self.ledger.transition(intent.intent_id, TradeState.REJECTED, reason=reason)
-            return self._result(intent.intent_id, reasons=quote_risk.reasons)
+            return self._reject(intent.intent_id, quote_risk.reasons)
+
+        if intent.side is TradeSide.SELL:
+            position = self.ledger.get_position(intent.asset)
+            if quote.estimated_base_amount > position.quantity:
+                return self._reject(
+                    intent.intent_id,
+                    ("insufficient_position",),
+                    error=(
+                        f"sell quantity {quote.estimated_base_amount} exceeds "
+                        f"position {position.quantity}"
+                    ),
+                )
 
         self.ledger.transition(
             intent.intent_id,
@@ -133,12 +146,85 @@ class TradingEngine:
             TradeState.CONFIRMED,
             reason=receipt.external_ref,
         )
-        self.ledger.transition(
-            intent.intent_id,
-            TradeState.RECONCILED,
-            reason="execution_receipt_reconciled",
-        )
+        try:
+            self.ledger.reconcile_confirmed_execution(intent, receipt)
+        except (ReconciliationError, InsufficientPositionError) as exc:
+            # The external execution is already confirmed; never rewrite this as FAILED.
+            # Leave the durable state at CONFIRMED for deterministic startup recovery.
+            self.ledger.set_error(intent.intent_id, f"reconciliation_required:{exc}")
+            return self._result(
+                intent.intent_id,
+                reasons=("reconciliation_required",),
+            )
         return self._result(intent.intent_id)
+
+    def recover_confirmed(self) -> list[EngineResult]:
+        """Recover accounting after a crash between confirmation and reconciliation."""
+        results: list[EngineResult] = []
+        for row in self.ledger.list_trades_by_state(TradeState.CONFIRMED):
+            intent_id = row["intent_id"]
+            try:
+                intent = self.ledger.load_intent(intent_id)
+                receipt = self.ledger.load_execution_receipt(intent_id)
+                if receipt.state is not TradeState.CONFIRMED:
+                    raise ReconciliationError("stored confirmed trade lacks confirmed receipt")
+                self.ledger.reconcile_confirmed_execution(intent, receipt)
+                results.append(self._result(intent_id))
+            except ReconciliationError as exc:
+                self.ledger.set_error(intent_id, f"reconciliation_required:{exc}")
+                results.append(
+                    self._result(intent_id, reasons=("reconciliation_required",))
+                )
+        return results
+
+    def risk_snapshot(
+        self,
+        *,
+        realized_pnl_today_usd: Decimal | str | int | float | None = None,
+        trading_enabled: bool = True,
+        data_fresh: bool = True,
+    ) -> RiskSnapshot:
+        """Build a deterministic snapshot from persisted portfolio accounting.
+
+        Open exposure is cost-basis exposure, not an optimistic mark-to-market
+        estimate. A future market-data adapter may supply a separate marked
+        exposure metric after it is independently validated.
+        """
+        metrics = self.ledger.portfolio_metrics()
+        realized = (
+            Decimal(str(realized_pnl_today_usd))
+            if realized_pnl_today_usd is not None
+            else metrics.realized_pnl_usd
+        )
+        with self.ledger._lock:
+            rows = self.ledger._conn.execute(
+                "SELECT quantity, average_cost_usd FROM positions"
+            ).fetchall()
+        exposure = sum(
+            (
+                Decimal(row["quantity"]) * Decimal(row["average_cost_usd"])
+                for row in rows
+            ),
+            Decimal("0"),
+        )
+        return RiskSnapshot(
+            open_exposure_usd=exposure,
+            realized_pnl_today_usd=realized,
+            trading_enabled=trading_enabled,
+            data_fresh=data_fresh,
+        )
+
+    def _reject(
+        self,
+        intent_id: str,
+        reasons: tuple[str, ...],
+        *,
+        error: str | None = None,
+    ) -> EngineResult:
+        message = error or ",".join(reasons)
+        self.ledger.set_error(intent_id, message)
+        self.ledger.transition(intent_id, TradeState.REJECTED, reason=message)
+        return self._result(intent_id, reasons=reasons)
 
     def _result(self, intent_id: str, reasons: tuple[str, ...] = ()) -> EngineResult:
         record = self.ledger.get_trade(intent_id)
