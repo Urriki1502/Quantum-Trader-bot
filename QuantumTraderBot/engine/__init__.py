@@ -22,8 +22,12 @@ from .ledger import (
 )
 from .adapters import ExecutionAdapter, PaperExecutionAdapter, QuoteProvider, StaticQuoteProvider
 from .service import TradingEngine, EngineResult
+from .assets import AssetRegistry, AssetSpec, USDC_MINT
+from .raydium_quote_provider import RaydiumUsdcQuoteProvider
 
 __all__ = [
+    "AssetRegistry",
+    "AssetSpec",
     "EngineResult",
     "ExecutionAdapter",
     "ExecutionReceipt",
@@ -38,10 +42,12 @@ __all__ = [
     "RiskEngine",
     "RiskPolicy",
     "RiskSnapshot",
+    "RaydiumUsdcQuoteProvider",
     "SQLiteTradeLedger",
     "StaticQuoteProvider",
     "TradeIntent",
     "TradeSide",
     "TradeState",
     "TradingEngine",
+    "USDC_MINT",
 ]

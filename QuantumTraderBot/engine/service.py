@@ -196,17 +196,7 @@ class TradingEngine:
             if realized_pnl_today_usd is not None
             else metrics.realized_pnl_usd
         )
-        with self.ledger._lock:
-            rows = self.ledger._conn.execute(
-                "SELECT quantity, average_cost_usd FROM positions"
-            ).fetchall()
-        exposure = sum(
-            (
-                Decimal(row["quantity"]) * Decimal(row["average_cost_usd"])
-                for row in rows
-            ),
-            Decimal("0"),
-        )
+        exposure = self.ledger.open_cost_basis_exposure()
         return RiskSnapshot(
             open_exposure_usd=exposure,
             realized_pnl_today_usd=realized,

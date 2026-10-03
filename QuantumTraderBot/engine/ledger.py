@@ -574,6 +574,19 @@ class SQLiteTradeLedger:
                 self._conn.execute("SELECT COUNT(*) FROM portfolio_fills").fetchone()[0]
             )
 
+    def open_cost_basis_exposure(self) -> Decimal:
+        with self._lock:
+            rows = self._conn.execute(
+                "SELECT quantity, average_cost_usd FROM positions"
+            ).fetchall()
+        return sum(
+            (
+                Decimal(row["quantity"]) * Decimal(row["average_cost_usd"])
+                for row in rows
+            ),
+            Decimal("0"),
+        )
+
     def portfolio_metrics(self) -> PortfolioMetrics:
         with self._lock:
             row = self._conn.execute(

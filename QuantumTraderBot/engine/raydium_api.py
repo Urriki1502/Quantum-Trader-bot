@@ -159,3 +159,63 @@ class RaydiumTradeApiClient:
         if "data" not in envelope:
             raise RaydiumTradeApiError("Raydium response missing data")
         return envelope["data"]
+
+
+class RaydiumPoolApiClient:
+    """Minimal public v3 pool metadata client used for liquidity risk checks."""
+
+    def __init__(
+        self,
+        base_url: str = "https://api-v3.raydium.io",
+        *,
+        transport: JsonHttpTransport | None = None,
+        timeout: float = 10.0,
+    ) -> None:
+        self.base_url = base_url.rstrip("/")
+        self.transport = transport or UrllibJsonTransport()
+        self.timeout = timeout
+
+    async def pair_liquidity_usd(self, mint1: str, mint2: str) -> Decimal:
+        envelope = await self.transport.request_json(
+            "GET",
+            f"{self.base_url}/pools/info/mint",
+            params={
+                "mint1": mint1,
+                "mint2": mint2,
+                "poolType": "all",
+                "poolSortField": "liquidity",
+                "sortType": "desc",
+                "pageSize": 100,
+                "page": 1,
+            },
+            timeout=self.timeout,
+        )
+        if envelope.get("success") is not True:
+            message = envelope.get("msg") or envelope.get("error") or "unknown pool API error"
+            raise RaydiumTradeApiError(str(message))
+
+        data = envelope.get("data")
+        if isinstance(data, Mapping):
+            pools = data.get("data", [])
+        else:
+            pools = data
+        if not isinstance(pools, list):
+            raise RaydiumTradeApiError("Raydium pool response must contain a list")
+
+        total = Decimal("0")
+        for pool in pools:
+            if not isinstance(pool, Mapping):
+                continue
+            raw = pool.get("tvl", pool.get("liquidity"))
+            if raw is None:
+                continue
+            try:
+                value = Decimal(str(raw))
+            except Exception:
+                continue
+            if value > 0:
+                total += value
+
+        if total <= 0:
+            raise RaydiumTradeApiError("no positive Raydium liquidity was reported")
+        return total
