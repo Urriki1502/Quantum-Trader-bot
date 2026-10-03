@@ -59,7 +59,7 @@ class StaticQuoteProvider:
         if price <= 0:
             raise DeterministicExecutionFailure("price must be positive")
 
-        now = utc_now()
+        now = intent.created_at
         base_amount = intent.notional_usd / price
         fee = intent.notional_usd * Decimal(self.fee_bps) / Decimal(10000)
         return Quote(
@@ -89,9 +89,9 @@ class PaperExecutionAdapter:
     async def execute(self, intent: TradeIntent, quote: Quote) -> ExecutionReceipt:
         if self.slippage_bps > intent.max_slippage_bps:
             raise DeterministicExecutionFailure("paper slippage exceeds intent limit")
-        if utc_now() >= quote.expires_at:
-            raise DeterministicExecutionFailure("quote expired before paper execution")
-
+        # Quote freshness is validated by TradingEngine/RiskEngine using the
+        # appropriate live or replay evaluation clock. Paper mode must not
+        # introduce a second wall-clock check that invalidates historical replay.
         slippage = Decimal(self.slippage_bps) / Decimal(10000)
         if intent.side is TradeSide.BUY:
             average_price = quote.price_usd * (Decimal("1") + slippage)
