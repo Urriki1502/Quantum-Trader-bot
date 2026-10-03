@@ -35,6 +35,7 @@ class RiskSnapshot:
     open_exposure_usd: Decimal = Decimal("0")
     realized_pnl_today_usd: Decimal = Decimal("0")
     available_cash_usd: Decimal | None = None
+    evaluation_time: datetime | None = None
     trading_enabled: bool = True
     data_fresh: bool = True
 
@@ -47,6 +48,8 @@ class RiskSnapshot:
                 "available_cash_usd",
                 Decimal(str(self.available_cash_usd)),
             )
+        if self.evaluation_time is not None and self.evaluation_time.tzinfo is None:
+            raise ValueError("evaluation_time must be timezone-aware")
 
 
 @dataclass(frozen=True, slots=True)
