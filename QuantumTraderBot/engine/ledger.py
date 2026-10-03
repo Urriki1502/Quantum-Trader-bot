@@ -41,6 +41,19 @@ class InsufficientCashError(ReconciliationError):
 
 
 @dataclass(frozen=True, slots=True)
+class ExecutionAttemptSnapshot:
+    attempt_id: str
+    intent_id: str
+    tx_identity: str
+    recent_blockhash: str
+    last_valid_block_height: int
+    external_ref: str | None
+    created_at: datetime
+    updated_at: datetime
+    existing: bool = False
+
+
+@dataclass(frozen=True, slots=True)
 class PaperAccountSnapshot:
     starting_cash_usd: Decimal
     cash_usd: Decimal
@@ -208,6 +221,18 @@ class SQLiteTradeLedger:
                     total_equity_usd TEXT NOT NULL,
                     drawdown_pct TEXT NOT NULL,
                     created_at TEXT NOT NULL
+                );
+
+                CREATE TABLE IF NOT EXISTS execution_attempts (
+                    attempt_id TEXT PRIMARY KEY,
+                    intent_id TEXT NOT NULL UNIQUE,
+                    tx_identity TEXT NOT NULL UNIQUE,
+                    recent_blockhash TEXT NOT NULL,
+                    last_valid_block_height INTEGER NOT NULL,
+                    external_ref TEXT UNIQUE,
+                    created_at TEXT NOT NULL,
+                    updated_at TEXT NOT NULL,
+                    FOREIGN KEY(intent_id) REFERENCES trades(intent_id)
                 );
                 """
             )
@@ -412,6 +437,151 @@ class SQLiteTradeLedger:
             )
             if cur.rowcount != 1:
                 raise TradeNotFoundError(intent_id)
+
+    def reserve_execution_attempt(
+        self,
+        intent_id: str,
+        *,
+        attempt_id: str,
+        tx_identity: str,
+        recent_blockhash: str,
+        last_valid_block_height: int,
+    ) -> ExecutionAttemptSnapshot:
+        if not attempt_id or not tx_identity or not recent_blockhash:
+            raise ValueError("attempt_id, tx_identity and recent_blockhash are required")
+        if last_valid_block_height < 0:
+            raise ValueError("last_valid_block_height must be >= 0")
+
+        with self._lock, self._conn:
+            trade = self._conn.execute(
+                "SELECT state FROM trades WHERE intent_id = ?",
+                (intent_id,),
+            ).fetchone()
+            if trade is None:
+                raise TradeNotFoundError(intent_id)
+
+            existing = self._conn.execute(
+                """
+                SELECT * FROM execution_attempts
+                WHERE intent_id = ? OR attempt_id = ? OR tx_identity = ?
+                """,
+                (intent_id, attempt_id, tx_identity),
+            ).fetchone()
+            if existing is not None:
+                exact = (
+                    existing["intent_id"] == intent_id
+                    and existing["attempt_id"] == attempt_id
+                    and existing["tx_identity"] == tx_identity
+                    and existing["recent_blockhash"] == recent_blockhash
+                    and int(existing["last_valid_block_height"]) == last_valid_block_height
+                )
+                if not exact:
+                    raise ReconciliationError("execution attempt identity collision")
+                return self._attempt_snapshot(existing, existing=True)
+
+            if TradeState(trade["state"]) is not TradeState.EXECUTION_PENDING:
+                raise ReconciliationError(
+                    "execution attempt may only be reserved from execution_pending"
+                )
+
+            now = utc_now().isoformat()
+            self._conn.execute(
+                """
+                INSERT INTO execution_attempts(
+                    attempt_id, intent_id, tx_identity, recent_blockhash,
+                    last_valid_block_height, external_ref, created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, NULL, ?, ?)
+                """,
+                (
+                    attempt_id,
+                    intent_id,
+                    tx_identity,
+                    recent_blockhash,
+                    last_valid_block_height,
+                    now,
+                    now,
+                ),
+            )
+            row = self._conn.execute(
+                "SELECT * FROM execution_attempts WHERE intent_id = ?",
+                (intent_id,),
+            ).fetchone()
+            return self._attempt_snapshot(row, existing=False)
+
+    def attach_attempt_external_ref(
+        self,
+        intent_id: str,
+        external_ref: str,
+    ) -> ExecutionAttemptSnapshot:
+        if not external_ref:
+            raise ValueError("external_ref must be non-empty")
+        with self._lock, self._conn:
+            row = self._conn.execute(
+                "SELECT * FROM execution_attempts WHERE intent_id = ?",
+                (intent_id,),
+            ).fetchone()
+            if row is None:
+                raise ReconciliationError("execution attempt has not been reserved")
+            if row["external_ref"] is not None:
+                if row["external_ref"] != external_ref:
+                    raise ReconciliationError(
+                        "execution attempt already has a different external reference"
+                    )
+                return self._attempt_snapshot(row, existing=True)
+
+            collision = self._conn.execute(
+                "SELECT intent_id FROM execution_attempts WHERE external_ref = ?",
+                (external_ref,),
+            ).fetchone()
+            if collision is not None and collision["intent_id"] != intent_id:
+                raise ReconciliationError("external execution reference collision")
+
+            now = utc_now().isoformat()
+            self._conn.execute(
+                """
+                UPDATE execution_attempts
+                SET external_ref = ?, updated_at = ?
+                WHERE intent_id = ?
+                """,
+                (external_ref, now, intent_id),
+            )
+            row = self._conn.execute(
+                "SELECT * FROM execution_attempts WHERE intent_id = ?",
+                (intent_id,),
+            ).fetchone()
+            return self._attempt_snapshot(row, existing=False)
+
+    def get_execution_attempt(self, intent_id: str) -> ExecutionAttemptSnapshot | None:
+        with self._lock:
+            row = self._conn.execute(
+                "SELECT * FROM execution_attempts WHERE intent_id = ?",
+                (intent_id,),
+            ).fetchone()
+        return None if row is None else self._attempt_snapshot(row, existing=True)
+
+    def execution_attempt_count(self) -> int:
+        with self._lock:
+            return int(
+                self._conn.execute("SELECT COUNT(*) FROM execution_attempts").fetchone()[0]
+            )
+
+    @staticmethod
+    def _attempt_snapshot(
+        row: sqlite3.Row,
+        *,
+        existing: bool,
+    ) -> ExecutionAttemptSnapshot:
+        return ExecutionAttemptSnapshot(
+            attempt_id=row["attempt_id"],
+            intent_id=row["intent_id"],
+            tx_identity=row["tx_identity"],
+            recent_blockhash=row["recent_blockhash"],
+            last_valid_block_height=int(row["last_valid_block_height"]),
+            external_ref=row["external_ref"],
+            created_at=datetime.fromisoformat(row["created_at"]),
+            updated_at=datetime.fromisoformat(row["updated_at"]),
+            existing=existing,
+        )
 
     def set_error(self, intent_id: str, message: str) -> None:
         with self._lock, self._conn:

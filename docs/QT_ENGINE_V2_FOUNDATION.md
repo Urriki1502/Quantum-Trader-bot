@@ -59,6 +59,10 @@ boundary; startup recovery completes it without resubmitting.
 - continuous free/public Raydium paper runner
 - mark-to-market JSON performance reports
 - unsigned Raydium build + Solana preflight simulation gate
+- durable execution-attempt identity / blockhash lifetime metadata
+- Solana blockhash validity guard before future submission
+- signature-status reconciliation without blind resubmission
+- missing signatures become expired only after the recorded lastValidBlockHeight
 - fee-aware weighted average cost basis
 - sell-position validation
 - idempotent intent handling
@@ -73,8 +77,8 @@ boundary; startup recovery completes it without resubmitting.
 
 1. Run longer paper sessions on free/public Raydium data and collect evidence.
 2. Add replay reports, equity curves and strategy attribution.
-3. Add blockhash-expiry and signed-transaction identity evidence to the future live adapter contract.
-4. Add external-outcome reconciliation for SUBMITTED/UNKNOWN states.
-5. Only after the above remains green, add a guarded live execution adapter with
+3. Wire the persisted attempt/outcome primitives into a guarded live adapter.
+4. Add signed-byte transaction identity verification and confirmation-to-fill reconciliation.
+5. Only after the above remains green, add a tiny-cap live execution opt-in with
    explicit mainnet enablement, tiny hard caps and no implicit retry after ambiguous
    submission.

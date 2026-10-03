@@ -18,6 +18,7 @@ from .ledger import (
     InsufficientPositionError,
     PaperAccountSnapshot,
     EquitySnapshot,
+    ExecutionAttemptSnapshot,
     PortfolioFillResult,
     PortfolioMetrics,
     PositionSnapshot,
@@ -37,6 +38,14 @@ from .preflight import (
     TransactionSimulation,
 )
 from .report import PerformanceReport, build_performance_report
+from .outcome import (
+    BlockhashCheck,
+    ExpiredBlockhashError,
+    OutcomeResolution,
+    OutcomeState,
+    SolanaBlockhashGuard,
+    SolanaOutcomeReconciler,
+)
 from .signals import (
     MovingAverageCrossStrategy,
     SignalAction,
@@ -49,11 +58,16 @@ __all__ = [
     "AssetSpec",
     "EngineResult",
     "ExecutionAdapter",
+    "ExecutionAttemptSnapshot",
     "ExecutionReceipt",
     "InsufficientCashError",
     "InsufficientPositionError",
     "PaperAccountSnapshot",
     "EquitySnapshot",
+    "BlockhashCheck",
+    "ExpiredBlockhashError",
+    "OutcomeResolution",
+    "OutcomeState",
     "PaperExecutionAdapter",
     "PortfolioFillResult",
     "PortfolioMetrics",
@@ -78,6 +92,8 @@ __all__ = [
     "PreflightSimulationError",
     "SessionDecision",
     "SignalAction",
+    "SolanaBlockhashGuard",
+    "SolanaOutcomeReconciler",
     "StrategyContext",
     "StrategySignal",
     "TransactionSimulation",
