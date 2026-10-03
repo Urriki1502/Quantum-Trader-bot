@@ -111,7 +111,10 @@ class PaperTradingSession:
         data_fresh = replay or (0 <= age_seconds <= self.max_tick_age_seconds)
         result = await self.engine.execute_intent(
             intent,
-            self.engine.risk_snapshot(data_fresh=data_fresh),
+            self.engine.risk_snapshot(
+                data_fresh=data_fresh,
+                evaluation_time=tick.observed_at if replay else None,
+            ),
         )
         return SessionDecision(tick=tick, signal=signal, engine_result=result)
 
