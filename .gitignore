@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+
+# Local secrets/config
+.env
+.env.*
+!.env.example
+
+# QT runtime state
+qt-paper.db
+qt-paper.db-shm
+qt-paper.db-wal
+*.db-shm
+*.db-wal
+
+# Runtime logs
+*.log
+logs/
