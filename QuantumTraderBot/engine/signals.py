@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections import deque
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from decimal import Decimal
 from enum import Enum
 from typing import Iterable, Protocol
@@ -50,13 +50,14 @@ class MovingAverageCrossStrategy:
     short_window: int = 3
     long_window: int = 8
     strategy_id: str = "ma-cross-v1"
+    _prices: deque[Decimal] = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
         if self.short_window <= 0 or self.long_window <= 0:
             raise ValueError("moving-average windows must be positive")
         if self.short_window >= self.long_window:
             raise ValueError("short_window must be smaller than long_window")
-        self._prices: deque[Decimal] = deque(maxlen=self.long_window + 1)
+        self._prices = deque(maxlen=self.long_window + 1)
 
     def prime(self, ticks: Iterable[MarketTick]) -> None:
         for tick in ticks:
