@@ -4,7 +4,7 @@ import json
 import sqlite3
 import threading
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from decimal import Decimal
 from pathlib import Path
 from typing import Any
@@ -34,6 +34,27 @@ class ReconciliationError(RuntimeError):
 
 class InsufficientPositionError(ReconciliationError):
     pass
+
+
+class InsufficientCashError(ReconciliationError):
+    pass
+
+
+@dataclass(frozen=True, slots=True)
+class PaperAccountSnapshot:
+    starting_cash_usd: Decimal
+    cash_usd: Decimal
+    high_water_equity_usd: Decimal
+    max_drawdown_pct: Decimal
+
+
+@dataclass(frozen=True, slots=True)
+class EquitySnapshot:
+    cash_usd: Decimal
+    positions_value_usd: Decimal
+    total_equity_usd: Decimal
+    drawdown_pct: Decimal
+    max_drawdown_pct: Decimal
 
 
 @dataclass(frozen=True, slots=True)
@@ -170,6 +191,24 @@ class SQLiteTradeLedger:
 
                 CREATE INDEX IF NOT EXISTS idx_portfolio_fills_asset
                     ON portfolio_fills(asset, created_at);
+
+                CREATE TABLE IF NOT EXISTS paper_account (
+                    id INTEGER PRIMARY KEY CHECK(id = 1),
+                    starting_cash_usd TEXT NOT NULL,
+                    cash_usd TEXT NOT NULL,
+                    high_water_equity_usd TEXT NOT NULL,
+                    max_drawdown_pct TEXT NOT NULL,
+                    updated_at TEXT NOT NULL
+                );
+
+                CREATE TABLE IF NOT EXISTS equity_snapshots (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    cash_usd TEXT NOT NULL,
+                    positions_value_usd TEXT NOT NULL,
+                    total_equity_usd TEXT NOT NULL,
+                    drawdown_pct TEXT NOT NULL,
+                    created_at TEXT NOT NULL
+                );
                 """
             )
 
@@ -459,6 +498,21 @@ class SQLiteTradeLedger:
             if qty <= 0 or gross < 0 or fee < 0:
                 raise ReconciliationError("execution receipt contains invalid fill amounts")
 
+            paper_account = self._conn.execute(
+                "SELECT * FROM paper_account WHERE id = 1"
+            ).fetchone()
+            new_cash: Decimal | None = None
+            if paper_account is not None:
+                old_cash = Decimal(paper_account["cash_usd"])
+                if intent.side is TradeSide.BUY:
+                    new_cash = old_cash - gross - fee
+                    if new_cash < 0:
+                        raise InsufficientCashError(
+                            f"paper cash {old_cash} cannot cover confirmed cost {gross + fee}"
+                        )
+                else:
+                    new_cash = old_cash + gross - fee
+
             if intent.side is TradeSide.BUY:
                 new_qty = old_qty + qty
                 total_cost = (old_qty * old_avg) + gross + fee
@@ -495,6 +549,16 @@ class SQLiteTradeLedger:
                     now,
                 ),
             )
+            if paper_account is not None and new_cash is not None:
+                self._conn.execute(
+                    """
+                    UPDATE paper_account
+                    SET cash_usd = ?, updated_at = ?
+                    WHERE id = 1
+                    """,
+                    (str(new_cash), now),
+                )
+
             self._conn.execute(
                 """
                 INSERT INTO portfolio_fills(
@@ -573,6 +637,125 @@ class SQLiteTradeLedger:
             return int(
                 self._conn.execute("SELECT COUNT(*) FROM portfolio_fills").fetchone()[0]
             )
+
+    def initialize_paper_account(self, starting_cash_usd: Decimal | str | int | float) -> PaperAccountSnapshot:
+        starting = Decimal(str(starting_cash_usd))
+        if starting <= 0:
+            raise ValueError("starting cash must be positive")
+        now = utc_now().isoformat()
+        with self._lock, self._conn:
+            row = self._conn.execute(
+                "SELECT * FROM paper_account WHERE id = 1"
+            ).fetchone()
+            if row is None:
+                self._conn.execute(
+                    """
+                    INSERT INTO paper_account(
+                        id, starting_cash_usd, cash_usd,
+                        high_water_equity_usd, max_drawdown_pct, updated_at
+                    ) VALUES (1, ?, ?, ?, ?, ?)
+                    """,
+                    (str(starting), str(starting), str(starting), "0", now),
+                )
+            elif Decimal(row["starting_cash_usd"]) != starting:
+                raise ValueError(
+                    "paper account already exists with a different starting balance"
+                )
+        account = self.get_paper_account()
+        if account is None:
+            raise RuntimeError("failed to initialize paper account")
+        return account
+
+    def get_paper_account(self) -> PaperAccountSnapshot | None:
+        with self._lock:
+            row = self._conn.execute(
+                "SELECT * FROM paper_account WHERE id = 1"
+            ).fetchone()
+        if row is None:
+            return None
+        return PaperAccountSnapshot(
+            starting_cash_usd=Decimal(row["starting_cash_usd"]),
+            cash_usd=Decimal(row["cash_usd"]),
+            high_water_equity_usd=Decimal(row["high_water_equity_usd"]),
+            max_drawdown_pct=Decimal(row["max_drawdown_pct"]),
+        )
+
+    def mark_to_market(self, prices_usd: dict[str, Decimal | str | int | float]) -> EquitySnapshot:
+        prices = {key: Decimal(str(value)) for key, value in prices_usd.items()}
+        if any(value <= 0 for value in prices.values()):
+            raise ValueError("mark prices must be positive")
+
+        with self._lock, self._conn:
+            account = self._conn.execute(
+                "SELECT * FROM paper_account WHERE id = 1"
+            ).fetchone()
+            if account is None:
+                raise ReconciliationError("paper account is not initialized")
+
+            rows = self._conn.execute(
+                "SELECT asset, quantity FROM positions WHERE CAST(quantity AS REAL) != 0"
+            ).fetchall()
+            positions_value = Decimal("0")
+            for row in rows:
+                asset = row["asset"]
+                if asset not in prices:
+                    raise ReconciliationError(f"missing mark price for {asset}")
+                positions_value += Decimal(row["quantity"]) * prices[asset]
+
+            cash = Decimal(account["cash_usd"])
+            equity = cash + positions_value
+            previous_high = Decimal(account["high_water_equity_usd"])
+            high_water = max(previous_high, equity)
+            drawdown = (
+                Decimal("0")
+                if high_water <= 0
+                else ((high_water - equity) / high_water) * Decimal("100")
+            )
+            max_drawdown = max(Decimal(account["max_drawdown_pct"]), drawdown)
+            now = utc_now().isoformat()
+
+            self._conn.execute(
+                """
+                UPDATE paper_account
+                SET high_water_equity_usd = ?, max_drawdown_pct = ?, updated_at = ?
+                WHERE id = 1
+                """,
+                (str(high_water), str(max_drawdown), now),
+            )
+            self._conn.execute(
+                """
+                INSERT INTO equity_snapshots(
+                    cash_usd, positions_value_usd, total_equity_usd,
+                    drawdown_pct, created_at
+                ) VALUES (?, ?, ?, ?, ?)
+                """,
+                (str(cash), str(positions_value), str(equity), str(drawdown), now),
+            )
+
+        return EquitySnapshot(
+            cash_usd=cash,
+            positions_value_usd=positions_value,
+            total_equity_usd=equity,
+            drawdown_pct=drawdown,
+            max_drawdown_pct=max_drawdown,
+        )
+
+    def realized_pnl_today_utc(self) -> Decimal:
+        now = datetime.now(timezone.utc)
+        start = datetime(now.year, now.month, now.day, tzinfo=timezone.utc).isoformat()
+        with self._lock:
+            rows = self._conn.execute(
+                """
+                SELECT realized_pnl_usd
+                FROM portfolio_fills
+                WHERE side = 'sell' AND created_at >= ?
+                """,
+                (start,),
+            ).fetchall()
+        return sum(
+            (Decimal(row["realized_pnl_usd"]) for row in rows),
+            Decimal("0"),
+        )
 
     def open_cost_basis_exposure(self) -> Decimal:
         with self._lock:

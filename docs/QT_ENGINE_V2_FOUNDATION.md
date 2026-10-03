@@ -50,6 +50,9 @@ boundary; startup recovery completes it without resubmitting.
 - paper execution adapter
 - durable SQLite trade/event ledger
 - durable positions and realized PnL
+- durable paper cash / buying-power accounting
+- mark-to-market equity snapshots and max drawdown
+- UTC daily realized-PnL circuit-breaker input
 - fee-aware weighted average cost basis
 - sell-position validation
 - idempotent intent handling
@@ -62,8 +65,8 @@ boundary; startup recovery completes it without resubmitting.
 
 ## Next implementation steps
 
-1. Add a mint/decimal registry and convert Raydium USDC routes into normalized engine quotes.
-2. Add paper market sessions driven by real read-only quotes.
+1. Run paper market sessions driven by real read-only Raydium quotes.
+2. Add a signal/event layer and replayable strategy inputs.
 3. Add transaction simulation and blockhash-expiry evidence to the future live adapter contract.
 4. Add persistent equity/drawdown metrics and replay reports.
 5. Run continuous paper trading with free/public infrastructure.

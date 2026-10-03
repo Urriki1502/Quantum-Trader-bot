@@ -18,7 +18,7 @@ class FakeTransport:
         return self.response
 
 
-def test_pool_liquidity_sums_positive_tvl_values():
+def test_pool_liquidity_uses_largest_pool_tvl_conservatively():
     transport = FakeTransport(
         {
             "success": True,
@@ -36,5 +36,5 @@ def test_pool_liquidity_sums_positive_tvl_values():
 
     liquidity = run(client.pair_liquidity_usd("mint-a", "mint-b"))
 
-    assert liquidity == Decimal("125000.5")
+    assert liquidity == Decimal("100000")
     assert transport.calls[0][2]["poolSortField"] == "liquidity"

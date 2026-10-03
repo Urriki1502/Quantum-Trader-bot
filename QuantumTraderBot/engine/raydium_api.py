@@ -202,7 +202,7 @@ class RaydiumPoolApiClient:
         if not isinstance(pools, list):
             raise RaydiumTradeApiError("Raydium pool response must contain a list")
 
-        total = Decimal("0")
+        largest = Decimal("0")
         for pool in pools:
             if not isinstance(pool, Mapping):
                 continue
@@ -213,9 +213,9 @@ class RaydiumPoolApiClient:
                 value = Decimal(str(raw))
             except Exception:
                 continue
-            if value > 0:
-                total += value
+            if value > largest:
+                largest = value
 
-        if total <= 0:
+        if largest <= 0:
             raise RaydiumTradeApiError("no positive Raydium liquidity was reported")
-        return total
+        return largest

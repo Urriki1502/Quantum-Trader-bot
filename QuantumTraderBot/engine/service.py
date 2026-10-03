@@ -190,16 +190,17 @@ class TradingEngine:
         estimate. A future market-data adapter may supply a separate marked
         exposure metric after it is independently validated.
         """
-        metrics = self.ledger.portfolio_metrics()
         realized = (
             Decimal(str(realized_pnl_today_usd))
             if realized_pnl_today_usd is not None
-            else metrics.realized_pnl_usd
+            else self.ledger.realized_pnl_today_utc()
         )
         exposure = self.ledger.open_cost_basis_exposure()
+        account = self.ledger.get_paper_account()
         return RiskSnapshot(
             open_exposure_usd=exposure,
             realized_pnl_today_usd=realized,
+            available_cash_usd=account.cash_usd if account is not None else None,
             trading_enabled=trading_enabled,
             data_fresh=data_fresh,
         )

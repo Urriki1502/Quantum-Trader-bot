@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from decimal import Decimal
 
-from .models import Quote, TradeIntent
+from .models import Quote, TradeIntent, TradeSide
 
 
 @dataclass(frozen=True, slots=True)
@@ -16,8 +16,11 @@ class RiskPolicy:
     max_slippage_bps: int = 300
     max_daily_loss_usd: Decimal = Decimal("100")
     max_quote_age_seconds: int = 20
+    buy_fee_reserve_bps: int = 100
 
     def __post_init__(self) -> None:
+        if self.buy_fee_reserve_bps < 0:
+            raise ValueError("buy_fee_reserve_bps must be >= 0")
         for name in (
             "max_notional_usd",
             "max_open_exposure_usd",
@@ -31,12 +34,19 @@ class RiskPolicy:
 class RiskSnapshot:
     open_exposure_usd: Decimal = Decimal("0")
     realized_pnl_today_usd: Decimal = Decimal("0")
+    available_cash_usd: Decimal | None = None
     trading_enabled: bool = True
     data_fresh: bool = True
 
     def __post_init__(self) -> None:
         object.__setattr__(self, "open_exposure_usd", Decimal(str(self.open_exposure_usd)))
         object.__setattr__(self, "realized_pnl_today_usd", Decimal(str(self.realized_pnl_today_usd)))
+        if self.available_cash_usd is not None:
+            object.__setattr__(
+                self,
+                "available_cash_usd",
+                Decimal(str(self.available_cash_usd)),
+            )
 
 
 @dataclass(frozen=True, slots=True)
@@ -66,6 +76,14 @@ class RiskEngine:
             reasons.append("max_open_exposure_exceeded")
         if snapshot.realized_pnl_today_usd <= -self.policy.max_daily_loss_usd:
             reasons.append("daily_loss_limit_reached")
+        if intent.side is TradeSide.BUY and snapshot.available_cash_usd is not None:
+            reserve = (
+                intent.notional_usd
+                * Decimal(self.policy.buy_fee_reserve_bps)
+                / Decimal("10000")
+            )
+            if intent.notional_usd + reserve > snapshot.available_cash_usd:
+                reasons.append("insufficient_cash")
         if intent.max_slippage_bps > self.policy.max_slippage_bps:
             reasons.append("requested_slippage_exceeds_policy")
 

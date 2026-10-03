@@ -35,6 +35,7 @@ async def main() -> None:
     parser.add_argument("--usd", type=Decimal, required=True)
     parser.add_argument("--max-slippage-bps", type=int, default=100)
     parser.add_argument("--db", default="qt-paper.db")
+    parser.add_argument("--initial-cash", type=Decimal, default=Decimal("1000"))
     parser.add_argument("--min-liquidity-usd", type=Decimal, default=Decimal("10000"))
     args = parser.parse_args()
 
@@ -42,6 +43,7 @@ async def main() -> None:
         [AssetSpec(symbol=args.symbol, mint=args.mint, decimals=args.decimals)]
     )
     ledger = SQLiteTradeLedger(args.db)
+    ledger.initialize_paper_account(args.initial_cash)
     quote_provider = RaydiumUsdcQuoteProvider(
         registry=registry,
         trade_api=RaydiumTradeApiClient(),
@@ -77,6 +79,7 @@ async def main() -> None:
     result = await engine.execute_intent(intent, engine.risk_snapshot())
     position = ledger.get_position(args.symbol)
     metrics = ledger.portfolio_metrics()
+    account = ledger.get_paper_account()
 
     print(f"state={result.state.value}")
     print(f"intent_id={intent.intent_id}")
@@ -87,6 +90,7 @@ async def main() -> None:
     print(f"average_cost_usd={position.average_cost_usd}")
     print(f"realized_pnl_usd={position.realized_pnl_usd}")
     print(f"paper_fills={metrics.fills}")
+    print(f"paper_cash_usd={account.cash_usd if account else 'uninitialized'}")
     print("PAPER ONLY: no wallet was loaded and no transaction was submitted.")
 
 
