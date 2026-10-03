@@ -5,6 +5,7 @@ Available modes are deliberately non-custodial/non-live:
   * replay: deterministic historical JSONL replay
   * paper: continuous paper trading on public Raydium quotes
   * report: inspect a persisted paper ledger
+  * safety-status: inspect the durable fail-closed live safety state
 
 There is intentionally no live-submit command in Phase 1.
 """
@@ -201,6 +202,21 @@ def parse_mark(value: str) -> tuple[str, Decimal]:
     return symbol, price
 
 
+def command_safety_status(args) -> int:
+    ledger = SQLiteTradeLedger(args.db)
+    state = ledger.get_runtime_safety()
+    print(
+        "{"
+        f'"live_submission_enabled": {str(state.live_submission_enabled).lower()}, '
+        f'"kill_switch_engaged": {str(state.kill_switch_engaged).lower()}, '
+        f'"reason": "{state.reason}", '
+        '"live_submit_command_present": false'
+        "}"
+    )
+    ledger.close()
+    return 0
+
+
 def command_report(args) -> int:
     ledger = SQLiteTradeLedger(args.db)
     report = build_performance_report(
@@ -239,6 +255,12 @@ def build_parser():
     paper.add_argument("--probe-usd", type=Decimal, default=Decimal("10"))
     paper.add_argument("--max-ticks", type=int, default=0)
 
+    safety = sub.add_parser(
+        "safety-status",
+        help="Inspect durable live-safety state; this command cannot unlock it",
+    )
+    safety.add_argument("--db", default="qt-paper.db")
+
     report = sub.add_parser("report", help="Report a persisted paper ledger")
     report.add_argument("--db", default="qt-paper.db")
     report.add_argument("--mark", action="append", default=[], type=parse_mark)
@@ -252,6 +274,8 @@ def main() -> int:
         return asyncio.run(command_replay(args))
     if args.command == "paper":
         return asyncio.run(command_paper(args))
+    if args.command == "safety-status":
+        return command_safety_status(args)
     return command_report(args)
 
 

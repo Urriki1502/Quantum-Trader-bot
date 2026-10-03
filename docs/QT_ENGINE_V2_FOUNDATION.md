@@ -69,6 +69,11 @@ boundary; startup recovery completes it without resubmitting.
 - deterministic JSONL replay source and replay-backed quote provider
 - replay equity curve + final performance summary
 - consolidated `qt_v2.py` CLI for replay, free paper mode and reports
+- durable live-safety state defaults to submission disabled + kill switch engaged
+- isolated signer capability interface; engine accepts no seed/private-key material
+- guarded build → exact-blockhash preflight → authorization → sign boundary
+- signed transaction attempt identity is persisted before any future submit capability
+- multi-transaction/multi-leg live execution remains fail-closed
 - network fee retained separately in lamports rather than guessed into USD
 - fee-aware weighted average cost basis
 - sell-position validation
@@ -84,9 +89,10 @@ boundary; startup recovery completes it without resubmitting.
 
 1. Run longer paper sessions on free/public Raydium data and collect evidence.
 2. Add replay reports, equity curves and strategy attribution.
-3. Wire the persisted attempt/outcome/fill primitives into a guarded live adapter.
+3. Keep the guarded live boundary submit-incapable while collecting paper evidence.
 4. Add native SOL/wSOL reconciliation and multi-leg transaction accounting.
-5. Only after the above remains green, add a tiny-cap live execution opt-in with
+5. Add a separate submitter capability only after review of signer isolation, kill-switch semantics and recovery invariants.
+6. Only after the above remains green, add a tiny-cap live execution opt-in with
    explicit mainnet enablement, tiny hard caps and no implicit retry after ambiguous
    submission.
 
@@ -121,3 +127,26 @@ python qt_v2.py report \
 Replay JSONL uses one object per line with `asset`, `price_usd`,
 `liquidity_usd`, `observed_at` (timezone required), and optional
 `event_id`, `price_impact_bps`, and `source`.
+
+
+## Durable live-safety boundary
+
+Every new database starts fail-closed:
+
+- `live_submission_enabled = false`
+- `kill_switch_engaged = true`
+- reason = `default_fail_closed`
+
+The current CLI can inspect this state but cannot unlock it:
+
+```bash
+python qt_v2.py safety-status --db qt-paper.db
+```
+
+The engine has an `IsolatedSigner` capability interface but no implementation
+that reads seed phrases, private-key strings, Solana keypair JSON, or filesystem
+key paths. The guarded live boundary can build, validate the recorded blockhash,
+preflight, and—only when the durable safety state explicitly allows it—invoke an
+injected signer and persist the exact signed-byte identity.
+
+It still has **no transaction broadcast method**.

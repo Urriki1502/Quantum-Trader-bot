@@ -41,6 +41,14 @@ class InsufficientCashError(ReconciliationError):
 
 
 @dataclass(frozen=True, slots=True)
+class RuntimeSafetySnapshot:
+    live_submission_enabled: bool
+    kill_switch_engaged: bool
+    reason: str
+    updated_at: datetime
+
+
+@dataclass(frozen=True, slots=True)
 class ExecutionAttemptSnapshot:
     attempt_id: str
     intent_id: str
@@ -133,6 +141,7 @@ class SQLiteTradeLedger:
             self._conn.execute("PRAGMA foreign_keys=ON")
         self._create_schema()
         self._migrate_schema()
+        self._ensure_runtime_safety()
 
     def close(self) -> None:
         with self._lock:
@@ -234,6 +243,14 @@ class SQLiteTradeLedger:
                     updated_at TEXT NOT NULL,
                     FOREIGN KEY(intent_id) REFERENCES trades(intent_id)
                 );
+
+                CREATE TABLE IF NOT EXISTS runtime_safety (
+                    id INTEGER PRIMARY KEY CHECK(id = 1),
+                    live_submission_enabled INTEGER NOT NULL CHECK(live_submission_enabled IN (0, 1)),
+                    kill_switch_engaged INTEGER NOT NULL CHECK(kill_switch_engaged IN (0, 1)),
+                    reason TEXT NOT NULL,
+                    updated_at TEXT NOT NULL
+                );
                 """
             )
 
@@ -253,6 +270,83 @@ class SQLiteTradeLedger:
                     self._conn.execute(
                         f"ALTER TABLE trades ADD COLUMN {name} {sql_type}"
                     )
+
+    def _ensure_runtime_safety(self) -> None:
+        with self._lock, self._conn:
+            row = self._conn.execute(
+                "SELECT id FROM runtime_safety WHERE id = 1"
+            ).fetchone()
+            if row is None:
+                self._conn.execute(
+                    """
+                    INSERT INTO runtime_safety(
+                        id, live_submission_enabled, kill_switch_engaged,
+                        reason, updated_at
+                    ) VALUES (1, 0, 1, ?, ?)
+                    """,
+                    ("default_fail_closed", utc_now().isoformat()),
+                )
+
+    def get_runtime_safety(self) -> RuntimeSafetySnapshot:
+        with self._lock:
+            row = self._conn.execute(
+                "SELECT * FROM runtime_safety WHERE id = 1"
+            ).fetchone()
+        if row is None:
+            raise ReconciliationError("runtime safety state is missing")
+        return RuntimeSafetySnapshot(
+            live_submission_enabled=bool(row["live_submission_enabled"]),
+            kill_switch_engaged=bool(row["kill_switch_engaged"]),
+            reason=row["reason"],
+            updated_at=datetime.fromisoformat(row["updated_at"]),
+        )
+
+    def set_live_submission_enabled(
+        self,
+        enabled: bool,
+        *,
+        reason: str,
+    ) -> RuntimeSafetySnapshot:
+        if not reason.strip():
+            raise ValueError("safety-state changes require a non-empty reason")
+        with self._lock, self._conn:
+            self._conn.execute(
+                """
+                UPDATE runtime_safety
+                SET live_submission_enabled = ?, reason = ?, updated_at = ?
+                WHERE id = 1
+                """,
+                (1 if enabled else 0, reason, utc_now().isoformat()),
+            )
+        return self.get_runtime_safety()
+
+    def engage_kill_switch(self, *, reason: str) -> RuntimeSafetySnapshot:
+        if not reason.strip():
+            raise ValueError("kill-switch changes require a non-empty reason")
+        with self._lock, self._conn:
+            self._conn.execute(
+                """
+                UPDATE runtime_safety
+                SET kill_switch_engaged = 1, reason = ?, updated_at = ?
+                WHERE id = 1
+                """,
+                (reason, utc_now().isoformat()),
+            )
+        return self.get_runtime_safety()
+
+    def release_kill_switch(self, *, reason: str) -> RuntimeSafetySnapshot:
+        if not reason.strip():
+            raise ValueError("kill-switch changes require a non-empty reason")
+        with self._lock, self._conn:
+            self._conn.execute(
+                """
+                UPDATE runtime_safety
+                SET kill_switch_engaged = 0, reason = ?, updated_at = ?
+                WHERE id = 1
+                """,
+                (reason, utc_now().isoformat()),
+            )
+        return self.get_runtime_safety()
 
     def create_intent(self, intent: TradeIntent) -> None:
         now = utc_now().isoformat()
