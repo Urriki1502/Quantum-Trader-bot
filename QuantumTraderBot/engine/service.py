@@ -90,7 +90,11 @@ class TradingEngine:
         self.ledger.attach_quote(intent.intent_id, quote)
         self.ledger.transition(intent.intent_id, TradeState.QUOTED, reason=quote.provider)
 
-        quote_risk = self.risk_engine.evaluate_quote(intent, quote)
+        quote_risk = self.risk_engine.evaluate_quote(
+            intent,
+            quote,
+            now=snapshot.evaluation_time,
+        )
         if not quote_risk.allowed:
             return self._reject(intent.intent_id, quote_risk.reasons)
 
@@ -183,6 +187,7 @@ class TradingEngine:
         realized_pnl_today_usd: Decimal | str | int | float | None = None,
         trading_enabled: bool = True,
         data_fresh: bool = True,
+        evaluation_time=None,
     ) -> RiskSnapshot:
         """Build a deterministic snapshot from persisted portfolio accounting.
 
@@ -201,6 +206,7 @@ class TradingEngine:
             open_exposure_usd=exposure,
             realized_pnl_today_usd=realized,
             available_cash_usd=account.cash_usd if account is not None else None,
+            evaluation_time=evaluation_time,
             trading_enabled=trading_enabled,
             data_fresh=data_fresh,
         )
