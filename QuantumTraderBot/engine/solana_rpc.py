@@ -105,6 +105,32 @@ class SolanaRpcClient:
             raise SolanaRpcError("getSignatureStatuses returned invalid result")
         return result["value"]
 
+    async def get_transaction(
+        self,
+        signature: str,
+        *,
+        commitment: str = "confirmed",
+        max_supported_transaction_version: int = 0,
+    ) -> Mapping[str, Any] | None:
+        if not signature:
+            raise ValueError("signature must be non-empty")
+        result = await self.call(
+            "getTransaction",
+            [
+                signature,
+                {
+                    "encoding": "jsonParsed",
+                    "commitment": commitment,
+                    "maxSupportedTransactionVersion": max_supported_transaction_version,
+                },
+            ],
+        )
+        if result is None:
+            return None
+        if not isinstance(result, Mapping):
+            raise SolanaRpcError("getTransaction returned invalid result")
+        return result
+
     async def simulate_transaction(
         self,
         transaction_base64: str,

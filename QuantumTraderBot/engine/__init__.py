@@ -38,6 +38,17 @@ from .preflight import (
     TransactionSimulation,
 )
 from .report import PerformanceReport, build_performance_report
+from .fill import (
+    FillReconciliationError,
+    ObservedSwapFill,
+    SolanaSwapFillReconciler,
+    observed_fill_to_receipt,
+)
+from .tx_identity import (
+    SerializedTransactionIdentity,
+    TransactionIdentityError,
+    transaction_identity_from_base64,
+)
 from .outcome import (
     BlockhashCheck,
     ExpiredBlockhashError,
@@ -60,12 +71,14 @@ __all__ = [
     "ExecutionAdapter",
     "ExecutionAttemptSnapshot",
     "ExecutionReceipt",
+    "FillReconciliationError",
     "InsufficientCashError",
     "InsufficientPositionError",
     "PaperAccountSnapshot",
     "EquitySnapshot",
     "BlockhashCheck",
     "ExpiredBlockhashError",
+    "ObservedSwapFill",
     "OutcomeResolution",
     "OutcomeState",
     "PaperExecutionAdapter",
@@ -92,12 +105,17 @@ __all__ = [
     "PreflightSimulationError",
     "SessionDecision",
     "SignalAction",
+    "SerializedTransactionIdentity",
     "SolanaBlockhashGuard",
+    "SolanaSwapFillReconciler",
     "SolanaOutcomeReconciler",
     "StrategyContext",
     "StrategySignal",
+    "TransactionIdentityError",
     "TransactionSimulation",
     "build_performance_report",
+    "observed_fill_to_receipt",
+    "transaction_identity_from_base64",
     "TradeIntent",
     "TradeSide",
     "TradeState",

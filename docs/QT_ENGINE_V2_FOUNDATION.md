@@ -63,6 +63,10 @@ boundary; startup recovery completes it without resubmitting.
 - Solana blockhash validity guard before future submission
 - signature-status reconciliation without blind resubmission
 - missing signatures become expired only after the recorded lastValidBlockHeight
+- exact serialized-transaction SHA-256 identity for retry-safe submission tracking
+- confirmed getTransaction token-balance delta reconciliation
+- actual SPL asset/USDC fill amount and effective price derived from chain metadata
+- network fee retained separately in lamports rather than guessed into USD
 - fee-aware weighted average cost basis
 - sell-position validation
 - idempotent intent handling
@@ -77,8 +81,8 @@ boundary; startup recovery completes it without resubmitting.
 
 1. Run longer paper sessions on free/public Raydium data and collect evidence.
 2. Add replay reports, equity curves and strategy attribution.
-3. Wire the persisted attempt/outcome primitives into a guarded live adapter.
-4. Add signed-byte transaction identity verification and confirmation-to-fill reconciliation.
+3. Wire the persisted attempt/outcome/fill primitives into a guarded live adapter.
+4. Add native SOL/wSOL reconciliation and multi-leg transaction accounting.
 5. Only after the above remains green, add a tiny-cap live execution opt-in with
    explicit mainnet enablement, tiny hard caps and no implicit retry after ambiguous
    submission.
